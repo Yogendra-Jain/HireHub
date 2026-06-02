@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { Link } from "react-router-dom";
 function Jobs() {
   const [jobs, setJobs] = useState([]);
 
@@ -28,26 +28,28 @@ function Jobs() {
 
       <div className="grid gap-6">
         {jobs.map((job) => (
-          <div
+            <Link
+            to={`/jobs/${job._id}`}
             key={job._id}
-            className="bg-gray-900 p-6 rounded-lg"
-          >
-            <h2 className="text-2xl font-bold">
-              {job.title}
-            </h2>
+            >
+            <div className="bg-gray-900 p-6 rounded-lg hover:bg-gray-800 cursor-pointer">
+                <h2 className="text-2xl font-bold">
+                {job.title}
+                </h2>
 
-            <p>{job.company}</p>
+                <p>{job.company}</p>
 
-            <p>{job.location}</p>
+                <p>{job.location}</p>
 
-            <p>{job.salary}</p>
+                <p>{job.salary}</p>
 
-            <p className="mt-2 text-gray-400">
-              {job.description}
-            </p>
-          </div>
+                <p className="mt-2 text-gray-400">
+                {job.description}
+                </p>
+            </div>
+            </Link>
         ))}
-      </div>
+        </div>
     </div>
   );
 }

@@ -8,7 +8,9 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Jobs from "./pages/Jobs";
-
+import JobDetails from "./pages/JobDetails";
+import RecruiterDashboard from "./pages/RecruiterDashboard";
+import CreateJob from "./pages/CreateJob";
 function App() {
   return (
     <BrowserRouter>
@@ -24,7 +26,26 @@ function App() {
 
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute> } />
           
+          <Route
+            path="/create-job"
+            element={
+              <ProtectedRoute>
+                <CreateJob />
+              </ProtectedRoute>
+            }
+          />
+          
           <Route path="/jobs" element={<Jobs />} />
+
+          <Route path="/jobs/:id" element={<JobDetails />} />
+
+          <Route path="/recruiter-dashboard"
+            element={
+              <ProtectedRoute>
+                <RecruiterDashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
         
       </div>

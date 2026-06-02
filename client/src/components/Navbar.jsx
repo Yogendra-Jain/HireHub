@@ -20,6 +20,7 @@ function Navbar() {
       <div className="flex gap-6 text-lg items-center">
         <Link to="/">Home</Link>
         <Link to="/jobs">Jobs</Link>
+        <Link to="/create-job">Create Job</Link>
         {!token ? (
           <>
             <Link to="/login">Login</Link>
