@@ -34,6 +34,43 @@ const applyJob = async (req, res) => {
   }
 };
 
+
+const getApplicants = async (req, res) => {
+  try {
+    const applications = await Application.find({
+      job: req.params.jobId,
+    }).populate("candidate", "name email");
+
+    res.status(200).json(applications);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const updateStatus = async (req, res) => {
+  try {
+    const application = await Application.findByIdAndUpdate(
+      req.params.applicationId,
+      {
+        status: req.body.status,
+      },
+      {
+        new: true,
+      }
+    );
+
+    res.status(200).json(application);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   applyJob,
+  getApplicants,
+  updateStatus,
 };
