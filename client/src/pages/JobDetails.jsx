@@ -23,6 +23,31 @@ function JobDetails() {
     }
   };
 
+  const handleApply = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        `http://localhost:5000/api/applications/apply/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert(response.data.message);
+    } catch (error) {
+      console.log(error);
+
+      alert(
+        error.response?.data?.message ||
+        "Failed to apply"
+      );
+    }
+  };
+
   if (!job) {
     return <h1>Loading...</h1>;
   }
@@ -40,6 +65,13 @@ function JobDetails() {
       <p>{job.salary}</p>
 
       <p className="mt-6">{job.description}</p>
+
+      <button
+        onClick={handleApply}
+        className="mt-6 bg-green-500 hover:bg-green-600 px-6 py-3 rounded font-bold"
+      >
+        Apply Now
+      </button>
     </div>
   );
 }

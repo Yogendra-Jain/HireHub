@@ -3,10 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 function Navbar() {
   const token = localStorage.getItem("token");
 
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+
+  const role = user?.role;
+
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
     navigate("/login");
   };
@@ -19,8 +26,27 @@ function Navbar() {
 
       <div className="flex gap-6 text-lg items-center">
         <Link to="/">Home</Link>
-        <Link to="/jobs">Jobs</Link>
-        <Link to="/create-job">Create Job</Link>
+        {role === "candidate" && (
+          <>
+            <Link to="/jobs">Jobs</Link>
+
+            <Link to="/my-applications">
+              My Applications
+            </Link>
+          </>
+        )}
+
+        {role === "recruiter" && (
+          <>
+            <Link to="/create-job">
+              Create Job
+            </Link>
+
+            <Link to="/recruiter-dashboard">
+              Recruiter Dashboard
+            </Link>
+          </>
+        )}
         {!token ? (
           <>
             <Link to="/login">Login</Link>
@@ -29,8 +55,6 @@ function Navbar() {
           </>
         ) : (
           <>
-            <Link to="/dashboard">Dashboard</Link>
-
             <button
               onClick={handleLogout}
               className="bg-red-500 px-4 py-1 rounded"

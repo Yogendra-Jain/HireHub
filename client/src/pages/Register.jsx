@@ -7,6 +7,8 @@ function Register() {
     password: "",
   });
 
+  const [role, setRole] = useState("candidate");
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -20,17 +22,20 @@ function Register() {
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/register",
-        formData
+        {
+          ...formData ,
+          role,
+        }
       );
 
       console.log(response.data);
 
       alert("Registration Successful");
     } catch (error) {
-      console.log(error.response.data);
+        console.log(error);
 
-      alert(error.response.data.message);
-    }
+        alert("Registration Failed");
+      }
   };
 
   return (
@@ -81,7 +86,19 @@ function Register() {
             className="w-full mt-2 p-3 rounded bg-gray-800 outline-none"
           />
         </div>
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          className="w-full p-3 rounded"
+        >
+          <option value="candidate">
+            Candidate
+          </option>
 
+          <option value="recruiter">
+            Recruiter
+          </option>
+        </select>
         <button
           type="submit"
           className="w-full bg-green-500 hover:bg-green-600 p-3 rounded font-bold"

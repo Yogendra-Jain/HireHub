@@ -11,6 +11,10 @@ import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
 import CreateJob from "./pages/CreateJob";
+import Applicants from "./pages/Applicants";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
+import MyApplications from "./pages/MyApplications";
+
 function App() {
   return (
     <BrowserRouter>
@@ -29,9 +33,9 @@ function App() {
           <Route
             path="/create-job"
             element={
-              <ProtectedRoute>
+              <RoleProtectedRoute  allowedRole="recruiter">
                 <CreateJob />
-              </ProtectedRoute>
+              </RoleProtectedRoute >
             }
           />
           
@@ -41,11 +45,30 @@ function App() {
 
           <Route path="/recruiter-dashboard"
             element={
-              <ProtectedRoute>
+              <RoleProtectedRoute  allowedRole="recruiter">
                 <RecruiterDashboard />
+              </RoleProtectedRoute >
+            }
+          />
+
+          <Route
+            path="/applicants/:jobId"
+            element={
+              <RoleProtectedRoute  allowedRole="recruiter">
+                <Applicants />
+              </RoleProtectedRoute >
+            }
+          />
+
+          <Route
+            path="/my-applications"
+            element={
+              <ProtectedRoute>
+                <MyApplications />
               </ProtectedRoute>
             }
           />
+
         </Routes>
         
       </div>

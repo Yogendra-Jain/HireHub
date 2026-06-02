@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function RecruiterDashboard() {
   const [jobs, setJobs] = useState([]);
@@ -45,6 +46,13 @@ function RecruiterDashboard() {
           <p>{job.company}</p>
 
           <p>{job.location}</p>
+
+          <Link
+            to={`/applicants/${job._id}`}
+            className="bg-green-500 px-4 py-2 rounded inline-block mt-3"
+          >
+            View Applicants
+          </Link>
         </div>
       ))}
     </div>
