@@ -8,6 +8,7 @@ const {
   applyJob,
   getApplicants,
   updateStatus,
+  getMyApplications,
 } = require("../controllers/application.controller");
 
 router.post("/apply/:jobId",protect, applyJob );
@@ -21,6 +22,12 @@ router.put(
   "/status/:applicationId",
   protect,
   updateStatus
+);
+
+router.get(
+  "/my-applications",
+  protect,
+  getMyApplications
 );
 
 module.exports = router;

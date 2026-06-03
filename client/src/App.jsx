@@ -14,6 +14,7 @@ import CreateJob from "./pages/CreateJob";
 import Applicants from "./pages/Applicants";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import MyApplications from "./pages/MyApplications";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -65,6 +66,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <MyApplications />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

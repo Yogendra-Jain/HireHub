@@ -49,6 +49,20 @@ const getApplicants = async (req, res) => {
   }
 };
 
+const getMyApplications = async (req, res) => {
+  try {
+    const applications = await Application.find({
+      candidate: req.user.id,
+    }).populate("job");
+
+    res.status(200).json(applications);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 const updateStatus = async (req, res) => {
   try {
     const application = await Application.findByIdAndUpdate(
@@ -73,4 +87,5 @@ module.exports = {
   applyJob,
   getApplicants,
   updateStatus,
+  getMyApplications,
 };

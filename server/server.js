@@ -1,10 +1,12 @@
-const express = require("express");
 const dotenv = require("dotenv");
+const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth.routes");
 const jobRoutes = require("./routes/job.routes");
 const applicationRoutes = require("./routes/application.routes");
+const userRoutes = require("./routes/user.routes");
+
 
 dotenv.config();
 connectDB();
@@ -15,6 +17,10 @@ app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes );
+app.use("/api/users", userRoutes);
+
+//console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
+
 
 app.get("/", (req, res) => {
   res.send("HireHub API Running");
