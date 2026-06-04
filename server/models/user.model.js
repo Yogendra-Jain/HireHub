@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
     
+    resumeAnalysis: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

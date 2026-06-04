@@ -15,7 +15,8 @@ import Applicants from "./pages/Applicants";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import MyApplications from "./pages/MyApplications";
 import Profile from "./pages/Profile";
-
+import ResumeAnalysis from "./pages/ResumeAnalysis";
+import AIChat from "./pages/AIChat";
 function App() {
   return (
     <BrowserRouter>
@@ -78,7 +79,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/resume-analysis"
+            element={
+              <ProtectedRoute>
+                <ResumeAnalysis />
+              </ProtectedRoute>
+            }
+          />
 
+          <Route
+            path="/ai-chat"
+            element={
+              <ProtectedRoute>
+                <AIChat />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
         
       </div>

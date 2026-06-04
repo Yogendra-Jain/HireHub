@@ -6,7 +6,8 @@ const authRoutes = require("./routes/auth.routes");
 const jobRoutes = require("./routes/job.routes");
 const applicationRoutes = require("./routes/application.routes");
 const userRoutes = require("./routes/user.routes");
-
+const aiRoutes = require("./routes/ai.routes");
+const chatRoutes = require("./routes/chat.routes");
 
 dotenv.config();
 connectDB();
@@ -18,7 +19,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes );
 app.use("/api/users", userRoutes);
-
+app.use("/api/ai", aiRoutes);
+app.use("/api/chat", chatRoutes);
 //console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
 
 

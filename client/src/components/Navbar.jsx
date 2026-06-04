@@ -58,7 +58,9 @@ function Navbar() {
             <Link to="/profile">
               Profile
             </Link>
-
+            <Link to="/ai-chat">
+              AI Chat
+            </Link>
             <button
               onClick={handleLogout}
               className="bg-red-500 px-4 py-1 rounded"
