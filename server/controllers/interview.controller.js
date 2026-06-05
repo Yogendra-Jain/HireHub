@@ -1,0 +1,74 @@
+const genAI = require("../config/gemini");
+const User = require("../models/user.model");
+const Job = require("../models/job.model");
+
+const generateInterviewQuestions = async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+
+    const user = await User.findById(req.user.id);
+
+    const job = await Job.findById(jobId);
+
+    if (!user || !job) {
+      return res.status(404).json({
+        message: "User or Job not found",
+      });
+    }
+
+    const prompt = `
+    You are an expert technical interviewer.
+
+    Candidate Resume Analysis:
+
+    ${JSON.stringify(user.resumeAnalysis)}
+
+    Job Title:
+    ${job.title}
+
+    Job Description:
+    ${job.description}
+
+    Generate interview questions.
+
+    Return ONLY valid JSON.
+
+    {
+    "technicalQuestions": [],
+    "hrQuestions": [],
+    "codingQuestions": []
+    }
+
+    Requirements:
+    - 5 technical questions
+    - 5 HR questions
+    - 5 coding questions
+    - Questions should be based on candidate skills and job requirements
+    `;
+
+    const model =
+    genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+    });
+
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+    const cleanedText = responseText
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+
+    const questions = JSON.parse(cleanedText);
+
+    res.status(200).json( questions );
+    
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = {
+  generateInterviewQuestions,
+};
