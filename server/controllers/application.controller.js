@@ -1,7 +1,13 @@
 const Application = require("../models/application.model");
+const Job = require("../models/job.model");
 
 const applyJob = async (req, res) => {
   try {
+    if (req.user.role !== "candidate") {
+      return res.status(403).json({
+        message: "Candidate only",
+      });
+    }
     const jobId = req.params.jobId;
     const candidateId = req.user.id;
 
@@ -37,6 +43,32 @@ const applyJob = async (req, res) => {
 
 const getApplicants = async (req, res) => {
   try {
+    if (req.user.role !== "recruiter") {
+      return res.status(403).json({
+        message: "Recruiter only",
+      });
+    }
+
+    const job = await Job.findById(
+      req.params.jobId
+    );
+
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found",
+      });
+    }
+
+    if (
+      job.recruiter.toString() !==
+      req.user.id
+    ) {
+      return res.status(403).json({
+        message:
+          "You can only view applicants for your own jobs",
+      });
+    }
+
     const applications = await Application.find({
       job: req.params.jobId,
     }).populate("candidate", "name email");
@@ -51,6 +83,11 @@ const getApplicants = async (req, res) => {
 
 const getMyApplications = async (req, res) => {
   try {
+    if (req.user.role !== "candidate") {
+      return res.status(403).json({
+        message: "Candidate only",
+      });
+    }
     const applications = await Application.find({
       candidate: req.user.id,
     }).populate("job");
@@ -65,15 +102,35 @@ const getMyApplications = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   try {
-    const application = await Application.findByIdAndUpdate(
-      req.params.applicationId,
-      {
-        status: req.body.status,
-      },
-      {
-        new: true,
-      }
-    );
+    if (req.user.role !== "recruiter") {
+      return res.status(403).json({
+        message: "Recruiter only",
+      });
+    }
+
+    const application = await Application.findById(
+      req.params.applicationId
+    ).populate("job");
+
+    if (!application) {
+      return res.status(404).json({
+        message: "Application not found",
+      });
+    }
+
+    if (
+      application.job.recruiter.toString() !==
+      req.user.id
+    ) {
+      return res.status(403).json({
+        message:
+          "You can only update applications for your own jobs",
+      });
+    }
+
+    application.status = req.body.status;
+
+    await application.save();
 
     res.status(200).json(application);
   } catch (error) {

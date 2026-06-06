@@ -2,8 +2,20 @@ const Job = require("../models/job.model");
 
 const createJob = async (req, res) => {
   try {
-    const { title, company, location, salary, description } =
-      req.body;
+
+    if (req.user.role !== "recruiter") {
+      return res.status(403).json({
+        message: "Recruiter only",
+      });
+    }
+
+    const {
+      title,
+      company,
+      location,
+      salary,
+      description,
+    } = req.body;
 
     const newJob = await Job.create({
       title,
@@ -18,6 +30,7 @@ const createJob = async (req, res) => {
       message: "Job created successfully",
       job: newJob,
     });
+
   } catch (error) {
     res.status(500).json({
       message: error.message,
