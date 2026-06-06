@@ -30,8 +30,8 @@ const userSchema = new mongoose.Schema(
     },
     
     resumeAnalysis: {
-      type: String,
-      default: "",
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
   },
   {
