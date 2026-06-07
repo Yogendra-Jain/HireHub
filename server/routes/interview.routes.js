@@ -6,12 +6,19 @@ const protect = require("../middleware/auth.middleware");
 
 const {
   generateInterviewQuestions,
-} = require("../controllers/interview.controller");
+  evaluateAnswer,
+} = require(
+  "../controllers/interview.controller"
+);
 
 router.get(
   "/:jobId",
   protect,
   generateInterviewQuestions
 );
-
+router.post(
+  "/evaluate",
+  protect,
+  evaluateAnswer
+);
 module.exports = router;

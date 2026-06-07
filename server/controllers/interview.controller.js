@@ -47,21 +47,92 @@ const generateInterviewQuestions = async (req, res) => {
     `;
 
     const model =
-    genAI.getGenerativeModel({
+      genAI.getGenerativeModel({
         model: "gemini-2.5-flash",
-    });
+      });
 
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
     const cleanedText = responseText
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    const questions = JSON.parse(cleanedText);
+
+    res.status(200).json(questions);
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const evaluateAnswer = async (req, res) => {
+  try {
+    const {
+      question,
+      answer,
+    } = req.body;
+
+    if (!question || !answer) {
+      return res.status(400).json({
+        message:
+          "Question and answer are required",
+      });
+    }
+
+    const prompt = `
+    You are a professional technical interviewer.
+
+    Question:
+    ${question}
+
+    Candidate Answer:
+    ${answer}
+
+    Evaluate the answer and return ONLY valid JSON.
+
+    Format:
+
+    {
+      "score": number,
+      "strengths": [
+        "strength 1"
+      ],
+      "weaknesses": [
+        "weakness 1"
+      ],
+      "improvedAnswer":
+        "better answer"
+    }
+    `;
+
+    const model =
+      genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+      });
+    const result =
+      await model.generateContent(
+        prompt
+      );
+
+    const responseText =
+      result.response.text();
+
+    const cleanedText =
+  responseText
     .replace(/```json/g, "")
     .replace(/```/g, "")
     .trim();
 
-    const questions = JSON.parse(cleanedText);
+  const evaluation =
+  JSON.parse(cleanedText);
 
-    res.status(200).json( questions );
-    
+  res.status(200).json(
+  evaluation
+);
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -71,4 +142,5 @@ const generateInterviewQuestions = async (req, res) => {
 
 module.exports = {
   generateInterviewQuestions,
+  evaluateAnswer,
 };
