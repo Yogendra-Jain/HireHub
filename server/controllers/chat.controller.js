@@ -1,13 +1,9 @@
-const genAI = require("../config/gemini");
+const groq = require("../config/groq");
 
 const chatWithAI = async (req, res) => {
   try {
     const { message } = req.body;
 
-    const model =
-      genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
-      });
 
     const User = require("../models/user.model");
 
@@ -18,7 +14,11 @@ const chatWithAI = async (req, res) => {
 
     This is the user's resume analysis:
 
-    ${user.resumeAnalysis}
+    ${JSON.stringify(
+      user.resumeAnalysis,
+      null,
+      2
+    )}
 
     Answer the user's question based on their resume.
 
@@ -26,12 +26,22 @@ const chatWithAI = async (req, res) => {
     ${message}
     `;
 
-    const result = await model.generateContent(prompt);
+    const chat =
+      await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.7,
+      });
 
     const reply =
-      result.response.text();
+      chat.choices[0].message.content;
 
-    res.json({
+    res.status(200).json({
       reply,
     });
 

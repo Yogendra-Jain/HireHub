@@ -10,6 +10,8 @@ const aiRoutes = require("./routes/ai.routes");
 const chatRoutes = require("./routes/chat.routes");
 const jobMatchRoutes = require("./routes/jobMatch.routes");
 const interviewRoutes = require("./routes/interview.routes");
+const testRoutes =
+  require("./routes/test.routes");
 
 dotenv.config();
 connectDB();
@@ -25,6 +27,7 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/job-match",jobMatchRoutes);
 app.use("/api/interview", interviewRoutes );
+app.use("/api/test", testRoutes);
 //console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
 
 

@@ -9,6 +9,13 @@ function JobDetails() {
   const [matchData, setMatchData] = useState(null);
   const [interviewData, setInterviewData] = useState(null);
 
+  const [answer, setAnswer] = useState("");
+
+  const [evaluation, setEvaluation] = useState(null);
+
+  const [selectedQuestion, setSelectedQuestion] = useState("");
+
+
   useEffect(() => {
     fetchJob();
   }, []);
@@ -89,6 +96,40 @@ function JobDetails() {
       console.log(error);
     }
   };
+
+  const evaluateInterviewAnswer =
+    async () => {
+      try {
+
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        const response =
+          await axios.post(
+            "http://localhost:5000/api/interview/evaluate",
+            {
+              question:
+                selectedQuestion,
+              answer,
+            },
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        setEvaluation(
+          response.data
+        );
+
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
   if (!job) {
     return <h1>Loading...</h1>;
@@ -183,7 +224,11 @@ function JobDetails() {
 
           {interviewData.technicalQuestions?.map(
             (q, index) => (
-              <p key={index}>
+              <p
+                key={index}
+                onClick={() => setSelectedQuestion(q)}
+                className="cursor-pointer hover:text-purple-400"
+              >
                 {index + 1}. {q}
               </p>
             )
@@ -195,7 +240,11 @@ function JobDetails() {
 
           {interviewData.hrQuestions?.map(
             (q, index) => (
-              <p key={index}>
+              <p
+                key={index}
+                onClick={() => setSelectedQuestion(q)}
+                className="cursor-pointer hover:text-purple-400"
+              >
                 {index + 1}. {q}
               </p>
             )
@@ -207,12 +256,96 @@ function JobDetails() {
 
           {interviewData.codingQuestions?.map(
             (q, index) => (
-              <p key={index}>
+              <p
+                key={index}
+                onClick={() => setSelectedQuestion(q)}
+                className="cursor-pointer hover:text-purple-400"
+              >
                 {index + 1}. {q}
               </p>
             )
           )}
 
+          {selectedQuestion && (
+            <div className="mt-8">
+
+              <h3 className="text-xl font-bold">
+                Selected Question
+              </h3>
+
+              <p className="mb-4">
+                {selectedQuestion}
+              </p>
+
+              <textarea
+                value={answer}
+                onChange={(e) =>
+                  setAnswer(
+                    e.target.value
+                  )
+                }
+                rows="6"
+                className="w-full p-3 text-black rounded"
+                placeholder="Type your answer..."
+              />
+
+              <button
+                onClick={
+                  evaluateInterviewAnswer
+                }
+                className="bg-green-500 px-4 py-2 rounded mt-4"
+              >
+                Evaluate Answer
+              </button>
+
+            </div>
+          )}
+
+          {evaluation && (
+            <div className="mt-8 bg-gray-800 p-6 rounded">
+
+              <h2 className="text-2xl font-bold text-green-400 mb-4">
+                AI Evaluation
+              </h2>
+
+              <p className="text-xl">
+                Score: {evaluation.score}/10
+              </p>
+
+              <h3 className="font-bold mt-4">
+                Strengths
+              </h3>
+
+              {evaluation.strengths?.map(
+                (item, index) => (
+                  <p key={index}>
+                    ✅ {item}
+                  </p>
+                )
+              )}
+
+              <h3 className="font-bold mt-4">
+                Weaknesses
+              </h3>
+
+              {evaluation.weaknesses?.map(
+                (item, index) => (
+                  <p key={index}>
+                    ❌ {item}
+                  </p>
+                )
+              )}
+
+              <h3 className="font-bold mt-4">
+                Improved Answer
+              </h3>
+
+              <p className="mt-2">
+                {evaluation.improvedAnswer}
+              </p>
+
+            </div>
+          )}
         </div>
       )}
     </div>

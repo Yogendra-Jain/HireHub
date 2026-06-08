@@ -1,4 +1,4 @@
-const genAI = require("../config/gemini");
+const groq = require("../config/groq");
 const User = require("../models/user.model");
 const axios = require("axios");
 const pdfParse = require("pdf-parse");
@@ -25,10 +25,6 @@ const analyzeResume = async (req, res) => {
             pdfResponse.data
         );
 
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-        });
-
         const prompt = `
         Analyze this resume and return ONLY valid JSON.
 
@@ -51,9 +47,20 @@ const analyzeResume = async (req, res) => {
         ${pdfData.text}
         `;
 
-        const result = await model.generateContent(prompt);
+        const chat =
+            await groq.chat.completions.create({
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt,
+                    },
+                ],
+                model: "llama-3.3-70b-versatile",
+                temperature: 0.3,
+            });
 
-        const analysisText = result.response.text();
+        const analysisText =
+            chat.choices[0].message.content;
 
         const cleanedText = analysisText
             .replace(/```json/g, "")
@@ -62,11 +69,11 @@ const analyzeResume = async (req, res) => {
 
         const analysis = JSON.parse(cleanedText);
 
-        res.status(200).json(analysis);
-
         user.resumeAnalysis = analysis;
 
         await user.save();
+
+        res.status(200).json(analysis);
     } catch (error) {
         console.log(error);
 

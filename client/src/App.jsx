@@ -17,6 +17,8 @@ import MyApplications from "./pages/MyApplications";
 import Profile from "./pages/Profile";
 import ResumeAnalysis from "./pages/ResumeAnalysis";
 import AIChat from "./pages/AIChat";
+import ApplicantsDashboard from "./pages/ApplicantsDashboard";
+
 function App() {
   return (
     <BrowserRouter>
@@ -95,6 +97,11 @@ function App() {
                 <AIChat />
               </ProtectedRoute>
             }
+          />
+
+          <Route
+            path="/applicants-dashboard/:jobId"
+            element={<ApplicantsDashboard />}
           />
         </Routes>
         

@@ -47,12 +47,23 @@ function RecruiterDashboard() {
 
           <p>{job.location}</p>
 
-          <Link
-            to={`/applicants/${job._id}`}
-            className="bg-green-500 px-4 py-2 rounded inline-block mt-3"
-          >
-            View Applicants
-          </Link>
+          <div className="flex gap-3 mt-3">
+
+            <Link
+              to={`/applicants/${job._id}`}
+              className="bg-green-500 px-4 py-2 rounded"
+            >
+              Manage Applicants
+            </Link>
+
+            <Link
+              to={`/applicants-dashboard/${job._id}`}
+              className="bg-purple-500 px-4 py-2 rounded"
+            >
+              AI Leaderboard
+            </Link>
+
+          </div>
         </div>
       ))}
     </div>
