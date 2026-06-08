@@ -1,3 +1,4 @@
+const groq = require("../config/groq");
 const Job = require("../models/job.model");
 
 const createJob = async (req, res) => {
@@ -17,12 +18,65 @@ const createJob = async (req, res) => {
       description,
     } = req.body;
 
+    const prompt = `
+    You are an expert technical recruiter.
+
+    Analyze this job.
+
+    Job Title:
+    ${title}
+
+    Job Description:
+    ${description}
+
+    Return ONLY valid JSON.
+
+    {
+      "requiredSkills": []
+    }
+
+    Rules:
+    - Extract technical skills
+    - Extract tools
+    - Extract frameworks
+    - Extract technologies
+    - Do not include explanations
+    `;
+
+    const chat =
+      await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.2,
+      });
+
+    const responseText =
+      chat.choices[0].message.content;
+
+    const cleanedText =
+      responseText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+    const extractedSkills =
+      JSON.parse(cleanedText);
+
     const newJob = await Job.create({
       title,
       company,
       location,
       salary,
       description,
+
+      requiredSkills:
+        extractedSkills.requiredSkills || [],
+
       recruiter: req.user.id,
     });
 

@@ -8,6 +8,18 @@ const chatWithAI = async (req, res) => {
     const User = require("../models/user.model");
 
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (!user.resumeAnalysis) {
+      return res.status(400).json({
+        message:
+          "Please analyze your resume first",
+      });
+    }
 
     const prompt = `
     You are an AI Career Assistant.

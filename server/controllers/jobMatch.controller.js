@@ -1,13 +1,10 @@
-const genAI = require("../config/gemini");
 const User = require("../models/user.model");
 const Job = require("../models/job.model");
 const Application = require("../models/application.model");
 const getJobMatch = async (req, res) => {
   try {
     const jobId = req.params.jobId;
-
     const user = await User.findById(req.user.id);
-
     const job = await Job.findById(jobId);
 
     if (!user || !job) {
@@ -16,49 +13,58 @@ const getJobMatch = async (req, res) => {
       });
     }
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+    const candidateSkills =
+      user.resumeAnalysis?.skills || [];
+
+    const requiredSkills =
+      job.requiredSkills || [];
+
+    const matchedSkills =
+      requiredSkills.filter(skill =>
+        candidateSkills.some(
+          candidateSkill =>
+            candidateSkill.toLowerCase() ===
+            skill.toLowerCase()
+        )
+      );
+
+    const missingSkills =
+      requiredSkills.filter(skill =>
+        !candidateSkills.some(
+          candidateSkill =>
+            candidateSkill.toLowerCase() ===
+            skill.toLowerCase()
+        )
+      );
+
+    const matchScore =
+      requiredSkills.length > 0
+        ? Math.round(
+          (matchedSkills.length /
+            requiredSkills.length) *
+          100
+        )
+        : 0;
+
+    let recommendation = "";
+
+    if (matchScore >= 80) {
+      recommendation = "Excellent Match";
+    }
+    else if (matchScore >= 60) {
+      recommendation = "Good Match";
+    }
+    else {
+      recommendation =
+        "Needs Skill Improvement";
+    }
+
+    res.status(200).json({
+      matchScore,
+      matchedSkills,
+      missingSkills,
+      recommendation,
     });
-
-    const prompt = `
-Compare this candidate with the job.
-
-Candidate Resume Analysis:
-
-${JSON.stringify(user.resumeAnalysis)}
-
-Job Title:
-${job.title}
-
-Job Description:
-${job.description}
-
-Return ONLY valid JSON.
-
-{
-  "matchScore": 0,
-  "matchedSkills": [],
-  "missingSkills": [],
-  "recommendation": ""
-}
-
-IMPORTANT:
-- matchScore must be between 0 and 100
-- Return only JSON
-`;
-
-    const result = await model.generateContent(prompt);
-
-    const responseText = result.response.text();
-
-    const cleanedText = responseText
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-
-    const matchData = JSON.parse(cleanedText);
-
-    res.status(200).json(matchData);
 
   } catch (error) {
     console.log(error);
@@ -100,68 +106,61 @@ const getApplicantsMatch = async (req, res) => {
         job: req.params.jobId,
       }).populate("candidate");
 
-    const model =
-      genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
-      });
-
     const applicantsWithScore = [];
 
     for (const application of applications) {
 
-      const candidate =
-        application.candidate;
+      const candidateSkills =
+        candidate.resumeAnalysis?.skills || [];
 
-      if (!candidate.resumeAnalysis) {
-        continue;
-      }
+      const requiredSkills =
+        job.requiredSkills || [];
 
-
-      const prompt = `
-      Compare this candidate with the job.
-
-      Candidate Resume Analysis:
-
-      ${JSON.stringify(
-        candidate.resumeAnalysis
-      )}
-
-      Job Title:
-      ${job.title}
-
-      Job Description:
-      ${job.description}
-
-      Return ONLY valid JSON.
-
-      {
-        "matchScore": 0,
-        "matchedSkills": [],
-        "missingSkills": [],
-        "recommendation": ""
-      }
-
-      IMPORTANT:
-      - matchScore must be between 0 and 100
-      - Return only JSON
-      `;
-
-      const result =
-        await model.generateContent(
-          prompt
+      const matchedSkills =
+        requiredSkills.filter(skill =>
+          candidateSkills.some(
+            candidateSkill =>
+              candidateSkill.toLowerCase() ===
+              skill.toLowerCase()
+          )
         );
 
-      const responseText =
-        result.response.text();
+      const missingSkills =
+        requiredSkills.filter(skill =>
+          !candidateSkills.some(
+            candidateSkill =>
+              candidateSkill.toLowerCase() ===
+              skill.toLowerCase()
+          )
+        );
 
-      const cleanedText =
-        responseText
-          .replace(/```json/g, "")
-          .replace(/```/g, "")
-          .trim();
+      const matchScore =
+        requiredSkills.length > 0
+          ? Math.round(
+            (matchedSkills.length /
+              requiredSkills.length) *
+            100
+          )
+          : 0;
 
-      const matchData =
-        JSON.parse(cleanedText);
+      let recommendation = "";
+
+      if (matchScore >= 90) {
+        recommendation =
+          "Strongly Recommended";
+      }
+      else if (matchScore >= 70) {
+        recommendation =
+          "Recommended";
+      }
+      else if (matchScore >= 50) {
+        recommendation =
+          "Potential Candidate";
+      }
+      else {
+        recommendation =
+          "Needs More Skills";
+      }
 
       applicantsWithScore.push({
         applicationId:
@@ -179,17 +178,13 @@ const getApplicantsMatch = async (req, res) => {
         status:
           application.status,
 
-        matchScore:
-          matchData.matchScore,
+        matchScore,
 
-        matchedSkills:
-          matchData.matchedSkills,
+        matchedSkills,
 
-        missingSkills:
-          matchData.missingSkills,
+        missingSkills,
 
-        recommendation:
-          matchData.recommendation,
+        recommendation,
       });
     }
     applicantsWithScore.sort(

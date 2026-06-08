@@ -1,4 +1,4 @@
-const genAI = require("../config/gemini");
+const groq = require("../config/groq");
 const User = require("../models/user.model");
 const Job = require("../models/job.model");
 
@@ -15,7 +15,12 @@ const generateInterviewQuestions = async (req, res) => {
         message: "User or Job not found",
       });
     }
-
+    if (!user.resumeAnalysis) {
+      return res.status(400).json({
+        message:
+          "Please analyze your resume first",
+      });
+    }
     const prompt = `
     You are an expert technical interviewer.
 
@@ -46,13 +51,21 @@ const generateInterviewQuestions = async (req, res) => {
     - Questions should be based on candidate skills and job requirements
     `;
 
-    const model =
-      genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+    const chat =
+      await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.5,
       });
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const responseText =
+      chat.choices[0].message.content;
+
     const cleanedText = responseText
       .replace(/```json/g, "")
       .replace(/```/g, "")
@@ -63,6 +76,8 @@ const generateInterviewQuestions = async (req, res) => {
     res.status(200).json(questions);
 
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -97,43 +112,43 @@ const evaluateAnswer = async (req, res) => {
     Format:
 
     {
-      "score": number,
-      "strengths": [
-        "strength 1"
-      ],
-      "weaknesses": [
-        "weakness 1"
-      ],
-      "improvedAnswer":
-        "better answer"
+      "score": 0,
+      "strengths": [],
+      "weaknesses": [],
+      "improvedAnswer": ""
     }
     `;
 
-    const model =
-      genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+    const chat =
+      await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.3,
       });
-    const result =
-      await model.generateContent(
-        prompt
-      );
 
     const responseText =
-      result.response.text();
+      chat.choices[0].message.content;
 
     const cleanedText =
-  responseText
-    .replace(/```json/g, "")
-    .replace(/```/g, "")
-    .trim();
+      responseText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
 
-  const evaluation =
-  JSON.parse(cleanedText);
+    const evaluation =
+      JSON.parse(cleanedText);
 
-  res.status(200).json(
-  evaluation
-);
+    res.status(200).json(
+      evaluation
+    );
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });

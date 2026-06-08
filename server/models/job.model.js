@@ -26,6 +26,10 @@ const jobSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    requiredSkills: {
+      type: [String],
+      default: [],
+    },
 
     recruiter: {
       type: mongoose.Schema.Types.ObjectId,
