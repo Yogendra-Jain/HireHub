@@ -1,173 +1,468 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 
+// ─────────────────────────────────────────────────────────────
+// Applicants Page — Recruiter view
+//
+// BUG FIX #4: Recruiter couldn't see applicant resume
+//
+// Root cause: getApplicants only populated "name email"
+// Fix in backend: now populates "name email resume resumeAnalysis"
+//
+// Fix in frontend: "Manage Applications" tab now shows a
+// "View Resume" button for each applicant that has uploaded one.
+// ─────────────────────────────────────────────────────────────
+
+const STATUS_COLORS = {
+  Applied: { bg: "#1e1b4b", color: "#a5b4fc", border: "#4f46e5" },
+  Reviewed: { bg: "#0f1b2d", color: "#38bdf8", border: "#0369a1" },
+  Selected: { bg: "#0d2f1a", color: "#4ade80", border: "#166534" },
+  Rejected: { bg: "#2a1a1a", color: "#f87171", border: "#991b1b" },
+};
+
+const scoreColor = (s) =>
+  s >= 70 ? "#818cf8" : s >= 40 ? "#fbbf24" : "#f87171";
+
+function RankMedal({ rank }) {
+  if (rank === 0) return <span className="text-xl">🥇</span>;
+  if (rank === 1) return <span className="text-xl">🥈</span>;
+  if (rank === 2) return <span className="text-xl">🥉</span>;
+  return (
+    <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+      style={{ background: "#1e2a4a", color: "#64748b" }}>
+      {rank + 1}
+    </span>
+  );
+}
+
 function Applicants() {
-    const { jobId } = useParams();
+  const { jobId } = useParams();
 
-    const [applications, setApplications] = useState([]);
-    const [leaderboard, setLeaderboard] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [loadingApps, setLoadingApps] = useState(true);
+  const [loadingBoard, setLoadingBoard] = useState(true);
+  const [activeTab, setActiveTab] = useState("ranking");
+  const [updatingId, setUpdatingId] = useState(null);
 
-    useEffect(() => {
-        fetchApplicants();
-        fetchLeaderboard();
-    }, []);
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
 
-    const fetchApplicants = async () => {
-        try {
-            const token = localStorage.getItem("token");
+  const [selectedApplication, setSelectedApplication] = useState(null);
 
-            const response = await axios.get(
-                `http://localhost:5000/api/applications/job/${jobId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+  const [interviewData, setInterviewData] = useState({
+    date: "",
+    time: "",
+    meetingLink: "",
+  });
 
-            setApplications(response.data);
-        } catch (error) {
-            console.log(error);
+
+  useEffect(() => {
+    fetchApplicants();
+    fetchLeaderboard();
+  }, []);
+
+  const fetchApplicants = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `http://localhost:5000/api/applications/job/${jobId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setApplications(res.data);
+    } catch (err) { console.error(err); }
+    finally { setLoadingApps(false); }
+  };
+
+  const fetchLeaderboard = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `http://localhost:5000/api/job-match/applicants-match/${jobId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setLeaderboard(res.data);
+    } catch (err) { console.error(err); }
+    finally { setLoadingBoard(false); }
+  };
+
+  const updateStatus = async (appId, newStatus) => {
+    setUpdatingId(appId);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:5000/api/applications/status/${appId}`,
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await fetchApplicants(); // refresh
+    } catch (err) { alert("Failed to update status"); }
+    finally { setUpdatingId(null); }
+  };
+
+  const openInterviewModal = (applicationId) => {
+
+    setSelectedApplication(applicationId);
+
+    setShowInterviewModal(true);
+
+  };
+
+  const scheduleInterview = async () => {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      await axios.post(
+
+        `http://localhost:5000/api/interview-schedule/schedule/${selectedApplication}`,
+
+        interviewData,
+
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
         }
-    };
+      );
 
-    const fetchLeaderboard = async () => {
-        try {
-            const token =
-                localStorage.getItem("token");
+      alert(
+        "Interview Scheduled Successfully"
+      );
 
-            const response =
-                await axios.get(
-                    `http://localhost:5000/api/job-match/applicants-match/${jobId}`,
-                    {
-                        headers: {
-                            Authorization:
-                                `Bearer ${token}`,
-                        },
-                    }
-                );
+      setShowInterviewModal(false);
 
-            setLeaderboard(response.data);
+      setInterviewData({
+        date: "",
+        time: "",
+        meetingLink: "",
+      });
 
-        } catch (error) {
-            console.log(error);
-        }
-    };
-    const updateStatus = async (
-        applicationId,
-        status
-    ) => {
-        try {
-            const token =
-                localStorage.getItem("token");
+    } catch (error) {
 
-            await axios.put(
-                `http://localhost:5000/api/applications/status/${applicationId}`,
-                { status },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+      console.log(error);
 
-            fetchApplicants();
-        } catch (error) {
-            console.log(error);
-        }
-    };
-    return (
-        <div className="p-10">
-            <h1 className="text-4xl font-bold mb-8">
-                Applicants
-            </h1>
-            <div className="bg-gray-900 p-6 rounded-lg mb-8">
+      alert(
+        "Failed to Schedule Interview"
+      );
 
-                <h2 className="text-3xl font-bold text-purple-400 mb-4">
-                    AI Candidate Ranking
-                </h2>
+    }
 
-                {leaderboard.map(
-                    (candidate, index) => (
-                        <div
-                            key={candidate.applicationId}
-                            className="flex justify-between border-b border-gray-700 py-3"
-                        >
+  };
 
-                            <div>
+  const formatDate = (d) =>
+    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-                                <h3 className="font-bold text-lg">
+  return (
+    <div style={{ background: "#070b18", minHeight: "100vh", color: "white" }}>
+      <div className="max-w-5xl mx-auto px-6 py-10">
 
-                                    {index === 0 && "🥇 "}
-                                    {index === 1 && "🥈 "}
-                                    {index === 2 && "🥉 "}
+        {/* Header */}
+        <div className="mb-8">
+          <Link to="/recruiter-dashboard"
+            className="flex items-center gap-2 mb-4 text-sm transition-colors"
+            style={{ color: "#64748b" }}
+            onMouseEnter={e => e.currentTarget.style.color = "#a5b4fc"}
+            onMouseLeave={e => e.currentTarget.style.color = "#64748b"}>
+            ← Back to Dashboard
+          </Link>
+          <h1 className="text-3xl font-bold mb-1">Applicants</h1>
+          <p style={{ color: "#64748b" }}>
+            {applications.length} total applicant{applications.length !== 1 ? "s" : ""}
+          </p>
+        </div>
 
-                                    {candidate.name}
+        {/* Tabs */}
+        <div className="flex gap-6 mb-8 border-b" style={{ borderColor: "#1e2a4a" }}>
+          {[
+            { key: "ranking", label: "AI Ranking" },
+            { key: "manage", label: `Manage (${applications.length})` },
+          ].map(t => (
+            <button key={t.key} onClick={() => setActiveTab(t.key)}
+              className="pb-3 px-1 font-medium text-sm transition-colors"
+              style={{
+                color: activeTab === t.key ? "#818cf8" : "#64748b",
+                borderBottom: activeTab === t.key ? "2px solid #6366f1" : "2px solid transparent",
+              }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-                                </h3>
+        {/* ── AI RANKING TAB ── */}
+        {activeTab === "ranking" && (
+          <div>
+            {loadingBoard ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-24 rounded-2xl animate-pulse" style={{ background: "#0d1117" }} />
+                ))}
+              </div>
+            ) : leaderboard.length === 0 ? (
+              <div className="text-center py-16" style={{ color: "#64748b" }}>
+                <p className="text-lg font-semibold text-white mb-2">No ranked candidates yet</p>
+                <p className="text-sm">Candidates need to analyze their resumes to get a match score</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {leaderboard.map((c, idx) => (
+                  <div key={c.applicationId}
+                    className="rounded-2xl p-6 transition-all"
+                    style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = "#4f46e5"}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = "#1e2a4a"}>
 
-                                <p>
-                                    {candidate.email}
-                                </p>
-
-                            </div>
-
-                            <div className="text-right">
-
-                                <p className="text-2xl text-green-400 font-bold">
-                                    {candidate.matchScore}%
-                                </p>
-
-                                <p>
-                                    {candidate.status}
-                                </p>
-
-                            </div>
-
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <RankMedal rank={idx} />
+                        <div>
+                          <p className="font-bold">{c.name}</p>
+                          <p className="text-sm" style={{ color: "#64748b" }}>{c.email}</p>
                         </div>
-                    )
-                )}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold" style={{ color: scoreColor(c.matchScore) }}>
+                          {c.matchScore}%
+                        </p>
+                        <p className="text-xs" style={{ color: "#64748b" }}>match</p>
+                      </div>
+                    </div>
+
+                    {c.recommendation && (
+                      <p className="text-sm font-semibold mb-1" style={{ color: scoreColor(c.matchScore) }}>
+                        {c.recommendation}
+                      </p>
+                    )}
+                    {c.aiInsight && (
+                      <p className="text-sm mb-3" style={{ color: "#94a3b8" }}>{c.aiInsight}</p>
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                      {c.matchedSkills?.map((s, i) => (
+                        <span key={i} className="px-2 py-0.5 rounded-full text-xs"
+                          style={{ background: "#0d2f1a", color: "#4ade80" }}>{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── MANAGE TAB ── */}
+        {activeTab === "manage" && (
+          <div>
+            {loadingApps ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-28 rounded-2xl animate-pulse" style={{ background: "#0d1117" }} />
+                ))}
+              </div>
+            ) : applications.length === 0 ? (
+              <div className="text-center py-16" style={{ color: "#64748b" }}>
+                <p className="text-lg font-semibold text-white mb-2">No applications yet</p>
+                <p className="text-sm">Candidates will appear here once they apply</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {applications.map(app => {
+                  const sc = STATUS_COLORS[app.status] || STATUS_COLORS["Applied"];
+                  return (
+                    <div key={app._id}
+                      className="rounded-2xl p-6 transition-all"
+                      style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = "#4f46e5"}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = "#1e2a4a"}>
+
+                      {/* Top row */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm"
+                            style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "white" }}>
+                            {app.candidate?.name?.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold">{app.candidate?.name}</p>
+                            <p className="text-sm" style={{ color: "#64748b" }}>{app.candidate?.email}</p>
+                          </div>
+                        </div>
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold"
+                          style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
+                          {app.status}
+                        </span>
+                      </div>
+
+                      <p className="text-xs mb-4" style={{ color: "#475569" }}>
+                        Applied {formatDate(app.createdAt)}
+                      </p>
+
+                      {/* FIX #4: Resume link — shows only if candidate uploaded a resume */}
+                      {app.candidate?.resume && (
+                        <div className="flex items-center gap-3 p-3 rounded-xl mb-4"
+                          style={{ background: "#1e1b4b", border: "1px solid #4f46e5" }}>
+                          <span className="text-sm font-medium" style={{ color: "#a5b4fc" }}>
+                            📄 Resume uploaded
+                          </span>
+                          <a href={app.candidate.resume} target="_blank" rel="noreferrer"
+                            className="ml-auto px-3 py-1.5 rounded-lg text-xs font-semibold"
+                            style={{ background: "#4f46e5", color: "white" }}>
+                            View Resume
+                          </a>
+                        </div>
+                      )}
+
+                      {/* No resume message */}
+                      {!app.candidate?.resume && (
+                        <div className="p-3 rounded-xl mb-4"
+                          style={{ background: "#1a1a2e", border: "1px solid #1e2a4a" }}>
+                          <p className="text-xs" style={{ color: "#475569" }}>
+                            No resume uploaded by this candidate
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Status update */}
+                      <div className="flex items-center gap-3">
+                        <label className="text-sm" style={{ color: "#94a3b8" }}>
+                          Update status:
+                        </label>
+                        <select
+                          value={app.status}
+                          disabled={updatingId === app._id}
+                          onChange={e => updateStatus(app._id, e.target.value)}
+                          className="px-3 py-2 rounded-lg text-sm outline-none"
+                          style={{
+                            background: "#1e2a4a", color: "white", border: "1px solid #2a3a5a",
+                            opacity: updatingId === app._id ? 0.5 : 1
+                          }}>
+                          <option value="Applied">Applied</option>
+                          <option value="Reviewed">Reviewed</option>
+                          <option value="Selected">Selected</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+
+                        <button
+                          onClick={() =>
+                            openInterviewModal(app._id)
+                          }
+                          className="px-4 py-2 rounded-lg text-sm font-semibold"
+                          style={{
+                            background: "#4f46e5",
+                            color: "white"
+                          }}
+                        >
+                          Schedule Interview
+                        </button>
+
+                        {updatingId === app._id && (
+                          <span className="text-xs" style={{ color: "#64748b" }}>Saving...</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {showInterviewModal && (
+
+          <div
+            className="fixed inset-0 flex items-center justify-center"
+            style={{
+              background: "rgba(0,0,0,0.7)"
+            }}
+          >
+
+            <div
+              className="p-6 rounded-xl w-[500px]"
+              style={{
+                background: "#0d1117",
+                border: "1px solid #1e2a4a"
+              }}
+            >
+
+              <h2 className="text-xl font-bold mb-4">
+                Schedule Interview
+              </h2>
+
+              <input
+                type="date"
+                className="w-full p-3 mb-3 rounded"
+                value={interviewData.date}
+                onChange={(e) =>
+                  setInterviewData({
+                    ...interviewData,
+                    date: e.target.value
+                  })
+                }
+              />
+
+              <input
+                type="time"
+                className="w-full p-3 mb-3 rounded"
+                value={interviewData.time}
+                onChange={(e) =>
+                  setInterviewData({
+                    ...interviewData,
+                    time: e.target.value
+                  })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Meeting Link"
+                className="w-full p-3 mb-4 rounded"
+                value={interviewData.meetingLink}
+                onChange={(e) =>
+                  setInterviewData({
+                    ...interviewData,
+                    meetingLink: e.target.value
+                  })
+                }
+              />
+
+              <div className="flex gap-3">
+
+                <button
+                  onClick={scheduleInterview}
+                  className="px-4 py-2 rounded"
+                  style={{
+                    background: "#4f46e5"
+                  }}
+                >
+                  Schedule
+                </button>
+
+                <button
+                  onClick={() =>
+                    setShowInterviewModal(false)
+                  }
+                  className="px-4 py-2 rounded"
+                  style={{
+                    background: "#374151"
+                  }}
+                >
+                  Cancel
+                </button>
+
+              </div>
 
             </div>
-            {applications.map((app) => (
-                <div
-                    key={app._id}
-                    className="bg-gray-900 p-4 rounded-lg mb-4"
-                >
-                    <h2 className="text-xl font-bold">
-                        {app.candidate?.name}
-                    </h2>
 
-                    <p>{app.candidate?.email}</p>
+          </div>
 
-                    <select
-                        value={app.status}
-                        onChange={(e) =>
-                            updateStatus(app._id, e.target.value)
-                        }
-                        className="text-black p-2 rounded mt-2"
-                    >
-                        <option value="Applied">
-                            Applied
-                        </option>
-
-                        <option value="Reviewed">
-                            Reviewed
-                        </option>
-
-                        <option value="Selected">
-                            Selected
-                        </option>
-
-                        <option value="Rejected">
-                            Rejected
-                        </option>
-                    </select>
-                </div>
-            ))}
-        </div>
-    );
+        )}
+      </div>
+    </div>
+  );
 }
+
 
 export default Applicants;

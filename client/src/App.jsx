@@ -18,6 +18,10 @@ import Profile from "./pages/Profile";
 import ResumeAnalysis from "./pages/ResumeAnalysis";
 import AIChat from "./pages/AIChat";
 import ApplicantsDashboard from "./pages/ApplicantsDashboard";
+import AdminPanel from "./pages/AdminPanel";
+import MyInterviews from "./pages/MyInterviews";
+import RecruiterInterviews from "./pages/RecruiterInterviews";
+
 
 function App() {
   return (
@@ -74,6 +78,15 @@ function App() {
           />
 
           <Route
+            path="/my-interviews"
+            element={
+              <ProtectedRoute>
+                <MyInterviews />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/profile"
             element={
               <ProtectedRoute>
@@ -103,6 +116,28 @@ function App() {
             path="/applicants-dashboard/:jobId"
             element={<ApplicantsDashboard />}
           />
+
+          {/* Admin route — only users with role "admin" can access */}
+          <Route
+            path="/admin"
+            element={
+              <RoleProtectedRoute allowedRole="admin">
+                <AdminPanel />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/recruiter-interviews"
+            element={
+              <RoleProtectedRoute
+                allowedRole="recruiter"
+              >
+                <RecruiterInterviews />
+              </RoleProtectedRoute>
+            }
+          />
+
         </Routes>
         
       </div>

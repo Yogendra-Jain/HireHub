@@ -1,44 +1,53 @@
 const mongoose = require("mongoose");
 
+// ─────────────────────────────────────────────────────────────
+// User Model
+//
+// Change from original:
+//   role enum now includes "admin" in addition to
+//   "candidate" and "recruiter"
+//
+// To create an admin user, run this once in MongoDB shell:
+//   db.users.updateOne(
+//     { email: "admin@hirehub.com" },
+//     { $set: { role: "admin" } }
+//   )
+// ─────────────────────────────────────────────────────────────
+
 const userSchema = new mongoose.Schema(
   {
     name: {
-      type: String,
+      type:     String,
       required: true,
     },
-
     email: {
-      type: String,
+      type:     String,
       required: true,
-      unique: true,
+      unique:   true,
     },
-
     password: {
-      type: String,
+      type:     String,
       required: true,
     },
 
+    // Added "admin" to the enum
     role: {
-      type: String,
-      enum: ["candidate", "recruiter", "admin"],
+      type:    String,
+      enum:    ["candidate", "recruiter", "admin"],
       default: "candidate",
     },
 
     resume: {
-      type: String,
+      type:    String,
       default: "",
     },
-    
+
     resumeAnalysis: {
-      type: mongoose.Schema.Types.Mixed,
+      type:    mongoose.Schema.Types.Mixed,
       default: null,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
-
-module.exports = User;
+module.exports = mongoose.model("User", userSchema);
