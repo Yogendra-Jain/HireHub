@@ -17,9 +17,17 @@ const jwt     = require("jsonwebtoken");
 // without requiring re-upload.
 // ─────────────────────────────────────────────────────────────
 
+// SECURITY FIX: role used to come straight from req.body, so anyone could
+// register with { role: "admin" } and get full admin access. Public
+// registration may only ever create "candidate" or "recruiter" accounts —
+// "admin" must be granted manually in the database, never via this endpoint.
+const ALLOWED_PUBLIC_ROLES = ["candidate", "recruiter"];
+
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+
+    const safeRole = ALLOWED_PUBLIC_ROLES.includes(role) ? role : "candidate";
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -32,7 +40,7 @@ const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role,
+      role: safeRole,
     });
 
     const token = jwt.sign(

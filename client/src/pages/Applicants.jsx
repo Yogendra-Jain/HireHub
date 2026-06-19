@@ -371,93 +371,122 @@ function Applicants() {
         )}
 
         {showInterviewModal && (
-
-          <div
-            className="fixed inset-0 flex items-center justify-center"
-            style={{
-              background: "rgba(0,0,0,0.7)"
-            }}
-          >
-
-            <div
-              className="p-6 rounded-xl w-[500px]"
-              style={{
-                background: "#0d1117",
-                border: "1px solid #1e2a4a"
-              }}
-            >
-
-              <h2 className="text-xl font-bold mb-4">
-                Schedule Interview
-              </h2>
-
-              <input
-                type="date"
-                className="w-full p-3 mb-3 rounded"
-                value={interviewData.date}
-                onChange={(e) =>
-                  setInterviewData({
-                    ...interviewData,
-                    date: e.target.value
-                  })
-                }
-              />
-
-              <input
-                type="time"
-                className="w-full p-3 mb-3 rounded"
-                value={interviewData.time}
-                onChange={(e) =>
-                  setInterviewData({
-                    ...interviewData,
-                    time: e.target.value
-                  })
-                }
-              />
-
-              <input
-                type="text"
-                placeholder="Meeting Link"
-                className="w-full p-3 mb-4 rounded"
-                value={interviewData.meetingLink}
-                onChange={(e) =>
-                  setInterviewData({
-                    ...interviewData,
-                    meetingLink: e.target.value
-                  })
-                }
-              />
-
-              <div className="flex gap-3">
-
-                <button
-                  onClick={scheduleInterview}
-                  className="px-4 py-2 rounded"
-                  style={{
-                    background: "#4f46e5"
-                  }}
-                >
-                  Schedule
-                </button>
-
-                <button
-                  onClick={() =>
-                    setShowInterviewModal(false)
-                  }
-                  className="px-4 py-2 rounded"
-                  style={{
-                    background: "#374151"
-                  }}
-                >
-                  Cancel
-                </button>
-
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 50,
+            background: "rgba(0,0,0,0.8)", display: "flex",
+            alignItems: "center", justifyContent: "center", padding: 24
+          }}>
+            <div style={{
+              background: "#0d1117", border: "1px solid #1e2a4a",
+              borderRadius: 20, width: "100%", maxWidth: 500,
+              boxShadow: "0 32px 80px rgba(0,0,0,0.6)"
+            }}>
+              {/* Modal header */}
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "20px 24px", borderBottom: "1px solid #1e2a4a"
+              }}>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "white" }}>Schedule Interview</h2>
+                  <p style={{ margin: "3px 0 0", fontSize: 12, color: "#64748b" }}>Candidate will be notified by email</p>
+                </div>
+                <button onClick={() => setShowInterviewModal(false)} style={{
+                  background: "#1e2a4a", border: "none", borderRadius: 8,
+                  color: "#94a3b8", cursor: "pointer", padding: "6px 10px", fontSize: 18, lineHeight: 1
+                }}>✕</button>
               </div>
 
+              {/* Modal body */}
+              <div style={{ padding: 24 }}>
+                {/* Date field */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: "block", fontSize: 12, color: "#64748b", marginBottom: 6, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                    📅 Interview date
+                  </label>
+                  <input
+                    type="date"
+                    style={{
+                      width: "100%", padding: "11px 14px", borderRadius: 10,
+                      background: "#0a0e1a", border: "1px solid #1e2a4a", color: "white",
+                      fontSize: 14, outline: "none", boxSizing: "border-box"
+                    }}
+                    value={interviewData.date}
+                    onChange={(e) => setInterviewData({ ...interviewData, date: e.target.value })}
+                  />
+                </div>
+
+                {/* Time field */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: "block", fontSize: 12, color: "#64748b", marginBottom: 6, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                    🕐 Interview time
+                  </label>
+                  <input
+                    type="time"
+                    style={{
+                      width: "100%", padding: "11px 14px", borderRadius: 10,
+                      background: "#0a0e1a", border: "1px solid #1e2a4a", color: "white",
+                      fontSize: 14, outline: "none", boxSizing: "border-box"
+                    }}
+                    value={interviewData.time}
+                    onChange={(e) => setInterviewData({ ...interviewData, time: e.target.value })}
+                  />
+                </div>
+
+                {/* Meeting link field */}
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: "block", fontSize: 12, color: "#64748b", marginBottom: 6, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                    🔗 Meeting link
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://meet.google.com/abc-defg-hij"
+                    style={{
+                      width: "100%", padding: "11px 14px", borderRadius: 10,
+                      background: "#0a0e1a", border: "1px solid #1e2a4a", color: "white",
+                      fontSize: 14, outline: "none", boxSizing: "border-box"
+                    }}
+                    value={interviewData.meetingLink}
+                    onChange={(e) => setInterviewData({ ...interviewData, meetingLink: e.target.value })}
+                  />
+                </div>
+
+                {/* Email notice */}
+                <div style={{
+                  padding: "12px 14px", background: "#0d2f1a", border: "1px solid #166534",
+                  borderRadius: 10, marginBottom: 20
+                }}>
+                  <p style={{ margin: 0, fontSize: 12, color: "#4ade80" }}>
+                    📧 An email with the date, time, and meeting link will be automatically sent to the candidate.
+                  </p>
+                </div>
+
+                {/* Action buttons */}
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button
+                    onClick={scheduleInterview}
+                    disabled={!interviewData.date || !interviewData.time}
+                    style={{
+                      flex: 1, padding: "12px 0", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                      cursor: "pointer", background: "#4f46e5", color: "white", border: "none",
+                      opacity: !interviewData.date || !interviewData.time ? 0.5 : 1,
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    Schedule & notify candidate
+                  </button>
+                  <button
+                    onClick={() => setShowInterviewModal(false)}
+                    style={{
+                      padding: "12px 20px", borderRadius: 10, fontSize: 14, fontWeight: 600,
+                      cursor: "pointer", background: "#1e2a4a", color: "#94a3b8", border: "none"
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
-
           </div>
-
         )}
       </div>
     </div>
