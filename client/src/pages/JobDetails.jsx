@@ -105,7 +105,7 @@ function JobDetails() {
   const evaluateAnswer = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res   = await axios.post("${import.meta.env.VITE_API_URL}/api/interview/evaluate",
+      const res   = await axios.post(`${import.meta.env.VITE_API_URL}/api/interview/evaluate`,
         { question: selectedQ, answer },
         { headers: { Authorization: `Bearer ${token}` } });
       setEvaluation(res.data);

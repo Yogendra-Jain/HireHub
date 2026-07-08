@@ -61,7 +61,7 @@ function Profile() {
       formData.append("resume", selectedFile);
 
       const res = await axios.post(
-        "${import.meta.env.VITE_API_URL}/api/users/upload-resume",
+        `${import.meta.env.VITE_API_URL}/api/users/upload-resume`,
         formData,
         {
           headers: {
@@ -95,7 +95,7 @@ function Profile() {
     try {
       const token = localStorage.getItem("token");
       const res   = await axios.get(
-        "${import.meta.env.VITE_API_URL}/api/ai/analyze-resume",
+        `${import.meta.env.VITE_API_URL}/api/ai/analyze-resume`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

@@ -143,7 +143,7 @@ function Jobs() {
       if (jobType  !== "All") params.jobType          = jobType;
       if (expLevel !== "All") params.experienceLevel  = expLevel;
 
-      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/jobs", { params });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/jobs`, { params });
       setJobs(res.data);
     } catch (err) {
       console.error("Failed to fetch jobs:", err);

@@ -64,7 +64,7 @@ function AIChat() {
       // Send the FULL conversation history to our backend
       // The backend will forward it to Groq with the system prompt
       const response = await axios.post(
-        "${import.meta.env.VITE_API_URL}/api/chat",
+        `${import.meta.env.VITE_API_URL}/api/chat`,
         {
           // Send all messages so the backend can pass history to Groq
           messages: updatedMessages,

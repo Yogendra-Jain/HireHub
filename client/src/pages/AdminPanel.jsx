@@ -87,28 +87,28 @@ function AdminPanel() {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/admin/stats", { headers });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/stats`, { headers });
       setStats(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/admin/users", { headers });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users`, { headers });
       setUsers(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/admin/jobs", { headers });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/jobs`, { headers });
       setJobs(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchApplications = async () => {
     try {
-      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/admin/applications", { headers });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/applications`, { headers });
       setApplications(res.data);
     } catch (err) { console.error(err); }
   };

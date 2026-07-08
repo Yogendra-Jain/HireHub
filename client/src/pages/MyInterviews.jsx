@@ -57,7 +57,7 @@ function MyInterviews() {
   const fetchInterviews = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/interview-schedule/my-interviews", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/interview-schedule/my-interviews`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setInterviews(res.data);
