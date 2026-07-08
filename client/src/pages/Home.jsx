@@ -34,7 +34,7 @@ function Home() {
   const fetchRecentJobs = async () => {
     setJobsLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/jobs");
+      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/jobs");
       setRecentJobs(res.data.slice(0, 6)); // latest 6 jobs
     } catch (err) {
       console.error(err);

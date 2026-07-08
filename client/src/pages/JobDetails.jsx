@@ -56,7 +56,7 @@ function JobDetails() {
 
   const fetchJob = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/jobs/${id}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/jobs/${id}`);
       setJob(res.data);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -66,7 +66,7 @@ function JobDetails() {
     try {
       const token = localStorage.getItem("token");
       const res   = await axios.post(
-        `http://localhost:5000/api/applications/apply/${id}`, {},
+        `${import.meta.env.VITE_API_URL}/api/applications/apply/${id}`, {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setApplied(true);
@@ -82,7 +82,7 @@ function JobDetails() {
     setMatchLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res   = await axios.get(`http://localhost:5000/api/job-match/${id}`,
+      const res   = await axios.get(`${import.meta.env.VITE_API_URL}/api/job-match/${id}`,
         { headers: { Authorization: `Bearer ${token}` } });
       setMatchData(res.data);
       setActiveTab("match");
@@ -94,7 +94,7 @@ function JobDetails() {
     setInterviewLoad(true);
     try {
       const token = localStorage.getItem("token");
-      const res   = await axios.get(`http://localhost:5000/api/interview/${id}`,
+      const res   = await axios.get(`${import.meta.env.VITE_API_URL}/api/interview/${id}`,
         { headers: { Authorization: `Bearer ${token}` } });
       setInterviewData(res.data);
       setActiveTab("interview");
@@ -105,7 +105,7 @@ function JobDetails() {
   const evaluateAnswer = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res   = await axios.post("http://localhost:5000/api/interview/evaluate",
+      const res   = await axios.post("${import.meta.env.VITE_API_URL}/api/interview/evaluate",
         { question: selectedQ, answer },
         { headers: { Authorization: `Bearer ${token}` } });
       setEvaluation(res.data);

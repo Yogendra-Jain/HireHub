@@ -17,7 +17,7 @@ function ApplicantsDashboard() {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        `http://localhost:5000/api/job-match/applicants-match/${jobId}`,
+        `${import.meta.env.VITE_API_URL}/api/job-match/applicants-match/${jobId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

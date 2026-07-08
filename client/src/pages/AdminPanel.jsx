@@ -87,28 +87,28 @@ function AdminPanel() {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/stats", { headers });
+      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/admin/stats", { headers });
       setStats(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/users", { headers });
+      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/admin/users", { headers });
       setUsers(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/jobs", { headers });
+      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/admin/jobs", { headers });
       setJobs(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchApplications = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/applications", { headers });
+      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/admin/applications", { headers });
       setApplications(res.data);
     } catch (err) { console.error(err); }
   };
@@ -118,7 +118,7 @@ function AdminPanel() {
     if (!window.confirm(`Delete user "${userName}"? This will also delete their applications.`)) return;
     setDeletingId(userId);
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, { headers });
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`, { headers });
       setUsers(users.filter(u => u._id !== userId));
       fetchStats(); // refresh stats
     } catch (err) {
@@ -133,7 +133,7 @@ function AdminPanel() {
     if (!window.confirm(`Delete job "${jobTitle}"? This will also delete all its applications.`)) return;
     setDeletingId(jobId);
     try {
-      await axios.delete(`http://localhost:5000/api/admin/jobs/${jobId}`, { headers });
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/jobs/${jobId}`, { headers });
       setJobs(jobs.filter(j => j._id !== jobId));
       fetchStats();
     } catch (err) {

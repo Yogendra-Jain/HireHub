@@ -28,7 +28,7 @@ function RecruiterDashboard() {
   const fetchMyJobs = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res   = await axios.get("http://localhost:5000/api/jobs/my-jobs", {
+      const res   = await axios.get("${import.meta.env.VITE_API_URL}/api/jobs/my-jobs", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setJobs(res.data);
@@ -44,7 +44,7 @@ function RecruiterDashboard() {
     setDeletingId(jobId);
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/jobs/${jobId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/jobs/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Remove from list without refetching

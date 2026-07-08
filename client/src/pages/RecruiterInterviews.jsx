@@ -102,7 +102,7 @@ function RecruiterInterviews() {
   const fetchInterviews = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/interview-management/recruiter", {
+      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/interview-management/recruiter", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setInterviews(res.data);
@@ -124,7 +124,7 @@ function RecruiterInterviews() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/interview-management/reschedule/${selectedInterview._id}`,
+        `${import.meta.env.VITE_API_URL}/api/interview-management/reschedule/${selectedInterview._id}`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -144,7 +144,7 @@ function RecruiterInterviews() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/interview-management/cancel/${id}`, {},
+        `${import.meta.env.VITE_API_URL}/api/interview-management/cancel/${id}`, {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       showToast("Interview cancelled — candidate notified");

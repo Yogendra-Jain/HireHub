@@ -66,7 +66,7 @@ function Applicants() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:5000/api/applications/job/${jobId}`,
+        `${import.meta.env.VITE_API_URL}/api/applications/job/${jobId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setApplications(res.data);
@@ -78,7 +78,7 @@ function Applicants() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:5000/api/job-match/applicants-match/${jobId}`,
+        `${import.meta.env.VITE_API_URL}/api/job-match/applicants-match/${jobId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setLeaderboard(res.data);
@@ -91,7 +91,7 @@ function Applicants() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/applications/status/${appId}`,
+        `${import.meta.env.VITE_API_URL}/api/applications/status/${appId}`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -117,7 +117,7 @@ function Applicants() {
 
       await axios.post(
 
-        `http://localhost:5000/api/interview-schedule/schedule/${selectedApplication}`,
+        `${import.meta.env.VITE_API_URL}/api/interview-schedule/schedule/${selectedApplication}`,
 
         interviewData,
 
