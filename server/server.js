@@ -75,6 +75,13 @@ app.use("/api/interview-management",interviewManagementRoutes);
 
 app.get("/", (req, res) => res.send("HireHub API running"));
 
+app.get("/test", (req,res)=>{
+
+    res.json({
+        message:"New backend deployed"
+    });
+
+});
 // GLOBAL ERROR HANDLER: previously there was none, so thrown errors
 // (e.g. multer file-type/size rejections) fell through to Express's
 // default HTML error page instead of a clean JSON response.
