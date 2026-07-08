@@ -21,8 +21,33 @@ const interviewManagementRoutes = require( "./routes/interviewManagement.routes"
 connectDB();
 
 const app = express();
-app.use(express.json());
-app.use(cors());
+
+app.set("trust proxy",1);
+
+app.use(express.json({
+    limit:"10mb"
+}));
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.CLIENT_URL
+];
+
+app.use(cors({
+
+    origin:function(origin,callback){
+
+        if(!origin || allowedOrigins.includes(origin)){
+            callback(null,true);
+        }
+        else{
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+
+    credentials:true
+}));
+
 
 // COST/ABUSE PROTECTION: these routes all call paid third-party AI APIs
 // (Gemini/Groq). Without a limit, one user or script could rack up a huge
