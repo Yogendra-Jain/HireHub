@@ -3,38 +3,42 @@ const axios = require("axios");
 
 /**
  * Hybrid email sender:
- *  - If RESEND_API_KEY is set  → sends via Resend HTTP API  (works on Render)
- *  - Otherwise                 → sends via Nodemailer/Gmail  (works on localhost)
+ *  - If BREVO_API_KEY is set  → sends via Brevo HTTP API  (works on Render — no domain needed)
+ *  - Otherwise                → sends via Nodemailer/Gmail  (works on localhost)
  */
 const sendEmail = async (to, subject, html) => {
 
   // ──────────────────────────────────────────────
-  // PATH 1 — Resend HTTP API (for deployment)
+  // PATH 1 — Brevo HTTP API (for deployment)
+  // Free: 300 emails/day, no custom domain needed
   // ──────────────────────────────────────────────
-  if (process.env.RESEND_API_KEY) {
+  if (process.env.BREVO_API_KEY) {
     try {
       const response = await axios.post(
-        "https://api.resend.com/emails",
+        "https://api.brevo.com/v3/smtp/email",
         {
-          from: `HireHub <${process.env.RESEND_FROM || "onboarding@resend.dev"}>`,
-          to: [to],
+          sender: {
+            name: "HireHub",
+            email: process.env.EMAIL_USER || "jainyogendra855@gmail.com",
+          },
+          to: [{ email: to }],
           subject,
-          html,
+          htmlContent: html,
         },
         {
           headers: {
-            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            "api-key": process.env.BREVO_API_KEY,
             "Content-Type": "application/json",
           },
         }
       );
 
-      console.log("Email sent via Resend:", response.data.id);
+      console.log("Email sent via Brevo:", response.data.messageId);
       return response.data;
 
     } catch (error) {
       const msg = error.response?.data?.message || error.message;
-      console.log("EMAIL ERROR (Resend):", msg);
+      console.log("EMAIL ERROR (Brevo):", msg);
       throw new Error(msg);
     }
   }
@@ -44,7 +48,7 @@ const sendEmail = async (to, subject, html) => {
   // ──────────────────────────────────────────────
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     throw new Error(
-      "Email credentials missing: set RESEND_API_KEY (deployment) or EMAIL_USER + EMAIL_PASS (localhost)"
+      "Email credentials missing: set BREVO_API_KEY (deployment) or EMAIL_USER + EMAIL_PASS (localhost)"
     );
   }
 
@@ -53,7 +57,7 @@ const sendEmail = async (to, subject, html) => {
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS.trim(), // .trim() removes accidental leading/trailing spaces
+        pass: process.env.EMAIL_PASS.trim(),
       },
     });
 
