@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
 
 const sendEmail = async (to, subject, html) => {
   try {
@@ -15,7 +16,10 @@ const sendEmail = async (to, subject, html) => {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
-      family: 4, // Force IPv4 to prevent ENETUNREACH error on Render
+      // Force IPv4 lookup during DNS resolution
+      lookup: (hostname, options, callback) => {
+        dns.lookup(hostname, { ...options, family: 4 }, callback);
+      },
     });
 
 
