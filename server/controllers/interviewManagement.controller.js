@@ -50,54 +50,48 @@ const rescheduleInterview = async (req, res) => {
 
 
 
-    // SEND MAIL SAFELY
-    try {
+    // SEND MAIL SAFELY (Asynchronously in background)
+    sendEmail(
+      interview.candidate.email,
 
-      await sendEmail(
-        interview.candidate.email,
+      "Interview Rescheduled",
 
-        "Interview Rescheduled",
+      `
+      <h2>Hello ${interview.candidate.name}</h2>
 
-        `
-        <h2>Hello ${interview.candidate.name}</h2>
+      <p>Your interview has been rescheduled.</p>
 
-        <p>Your interview has been rescheduled.</p>
+      <p>
+      <b>Job:</b> ${interview.job.title}
+      </p>
 
-        <p>
-        <b>Job:</b> ${interview.job.title}
-        </p>
+      <p>
+      <b>Date:</b> ${interview.date}
+      </p>
 
-        <p>
-        <b>Date:</b> ${interview.date}
-        </p>
+      <p>
+      <b>Time:</b> ${interview.time}
+      </p>
 
-        <p>
-        <b>Time:</b> ${interview.time}
-        </p>
+      <a href="${interview.meetingLink}">
+      Join Interview
+      </a>
 
-        <a href="${interview.meetingLink}">
-        Join Interview
-        </a>
+      <br/><br/>
 
-        <br/><br/>
-
-        <p>Best Regards</p>
-        <p>HireHub Team</p>
-        `
-      );
-
-
-      console.log("Reschedule email sent");
-
-
-    } catch (mailError) {
-
-      console.log(
-        "Email failed:",
-        mailError.message
-      );
-
-    }
+      <p>Best Regards</p>
+      <p>HireHub Team</p>
+      `
+    )
+      .then(() => {
+        console.log("Reschedule email sent");
+      })
+      .catch((mailError) => {
+        console.log(
+          "Email failed:",
+          mailError.message
+        );
+      });
 
 
 
@@ -147,46 +141,38 @@ const cancelInterview = async (req, res) => {
 
 
 
-    // SEND CANCEL MAIL SAFELY
+    // SEND CANCEL MAIL SAFELY (Asynchronously in background)
+    sendEmail(
 
-    try {
-
-
-      await sendEmail(
-
-        interview.candidate.email,
+      interview.candidate.email,
 
 
-        "Interview Cancelled",
+      "Interview Cancelled",
 
 
-        `
-        <h2>Hello ${interview.candidate.name}</h2>
+      `
+      <h2>Hello ${interview.candidate.name}</h2>
 
-        <p>
-        Your interview for
-        <b>${interview.job.title}</b>
-        has been cancelled.
-        </p>
+      <p>
+      Your interview for
+      <b>${interview.job.title}</b>
+      has been cancelled.
+      </p>
 
-        <br/>
+      <br/>
 
-        <p>HireHub Team</p>
-        `
-      );
-
-
-      console.log("Cancel email sent");
-
-
-    } catch (mailError) {
-
-      console.log(
-        "Email failed:",
-        mailError.message
-      );
-
-    }
+      <p>HireHub Team</p>
+      `
+    )
+      .then(() => {
+        console.log("Cancel email sent");
+      })
+      .catch((mailError) => {
+        console.log(
+          "Email failed:",
+          mailError.message
+        );
+      });
 
 
 

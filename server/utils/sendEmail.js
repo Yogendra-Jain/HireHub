@@ -1,67 +1,38 @@
-const nodemailer = require("nodemailer");
-const dns = require("dns").promises;
+const axios = require("axios");
 
 const sendEmail = async (to, subject, html) => {
   try {
+    const apiKey = process.env.RESEND_API_KEY;
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      throw new Error("Email credentials missing");
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY is not defined in environment variables");
     }
 
-    // Dynamically resolve smtp.gmail.com to an IPv4 address to prevent IPv6 ENETUNREACH errors on Render
-    const addresses = await dns.resolve4("smtp.gmail.com");
-    if (!addresses || addresses.length === 0) {
-      throw new Error("Failed to resolve smtp.gmail.com to an IPv4 address");
-    }
-    const ipv4Host = addresses[0];
-
-    const transporter = nodemailer.createTransport({
-      host: ipv4Host,
-      port: 587,
-      secure: false, // use STARTTLS
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    // Resend's API endpoint (runs over HTTPS port 443 - never blocked by Render)
+    const response = await axios.post(
+      "https://api.resend.com/emails",
+      {
+        from: "HireHub <onboarding@resend.dev>", // Note: Free accounts can only send from onboarding@resend.dev
+        to: [to],
+        subject: subject,
+        html: html,
       },
-      tls: {
-        // Required so SSL validation matches the certificate domain instead of the raw IP
-        servername: "smtp.gmail.com",
-      },
-    });
-
-
-    const info = await transporter.sendMail({
-
-      from: `"HireHub" <${process.env.EMAIL_USER}>`,
-
-      to,
-
-      subject,
-
-      html,
-
-    });
-
-
-    console.log(
-      "Email sent:",
-      info.messageId
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
     );
 
-
-    return info;
-
+    console.log("Email sent successfully via Resend:", response.data.id);
+    return response.data;
 
   } catch (error) {
-
-    console.log(
-      "EMAIL ERROR:",
-      error.message
-    );
-
-    throw error;
+    const errorDetails = error.response?.data?.message || error.message;
+    console.log("EMAIL ERROR:", errorDetails);
+    throw new Error(errorDetails);
   }
 };
-
 
 module.exports = sendEmail;

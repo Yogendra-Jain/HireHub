@@ -123,52 +123,36 @@ const updateStatus = async (req, res) => {
     await application.save();
 
 
-    // SEND EMAIL WHEN SELECTED
+    // SEND EMAIL WHEN SELECTED (Asynchronously in background)
     if (req.body.status === "Selected") {
-
-      const fullApplication =
-        await Application.findById(application._id)
-          .populate("candidate", "name email")
-          .populate("job", "title");
-
-
-      try {
-
-        await sendEmail(
-          fullApplication.candidate.email,
-
-          "Congratulations! You Have Been Selected 🎉",
-
-          `
-          <h2>
-          Congratulations ${fullApplication.candidate.name} 🎉
-          </h2>
-
-          <p>
-          Your application for 
-          <strong>${fullApplication.job.title}</strong>
-          has been selected.
-          </p>
-
-          <p>
-          Recruiter will contact you soon.
-          </p>
-
-          <br>
-
-          <p>Best Regards,</p>
-          <p>HireHub Team</p>
-          `
-        );
-
-        console.log("Selection email sent");
-
-      } catch (mailError) {
-        console.log(
-          "Email failed:",
-          mailError.message
-        );
-      }
+      Application.findById(application._id)
+        .populate("candidate", "name email")
+        .populate("job", "title")
+        .then((fullApplication) => {
+          if (fullApplication && fullApplication.candidate) {
+            sendEmail(
+              fullApplication.candidate.email,
+              "Congratulations! You Have Been Selected 🎉",
+              `
+              <h2>Congratulations ${fullApplication.candidate.name} 🎉</h2>
+              <p>Your application for <strong>${fullApplication.job.title}</strong> has been selected.</p>
+              <p>Recruiter will contact you soon.</p>
+              <br>
+              <p>Best Regards,</p>
+              <p>HireHub Team</p>
+              `
+            )
+              .then(() => {
+                console.log("Selection email sent");
+              })
+              .catch((mailError) => {
+                console.log("Email failed:", mailError.message);
+              });
+          }
+        })
+        .catch((err) => {
+          console.log("Failed to load application details for email:", err.message);
+        });
     }
 
 

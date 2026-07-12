@@ -42,52 +42,46 @@ const scheduleInterview = async (req, res) => {
       meetingLink
     });
 
-    // Send email
-    try {
+    // Send email (Asynchronously in background)
+    sendEmail(
 
-      await sendEmail(
+      application.candidate.email,
 
-        application.candidate.email,
+      "Interview Scheduled",
 
-        "Interview Scheduled",
+      `
+  <h2>Hello ${application.candidate.name}</h2>
 
-        `
-    <h2>Hello ${application.candidate.name}</h2>
+  <p>Your interview has been scheduled.</p>
 
-    <p>Your interview has been scheduled.</p>
+  <p>
+  <b>Date:</b> ${date}
+  </p>
 
-    <p>
-    <b>Date:</b> ${date}
-    </p>
+  <p>
+  <b>Time:</b> ${time}
+  </p>
 
-    <p>
-    <b>Time:</b> ${time}
-    </p>
+  <a href="${meetingLink}">
+  Join Interview
+  </a>
 
-    <a href="${meetingLink}">
-    Join Interview
-    </a>
+  <br/>
 
-    <br/>
-
-    <p>
-    Please join 10 minutes early.
-    </p>
-    `
-      );
-
-
-      console.log("Interview mail sent");
-
-
-    } catch (mailError) {
-
-      console.log(
-        "Interview mail failed:",
-        mailError.message
-      );
-
-    }
+  <p>
+  Please join 10 minutes early.
+  </p>
+  `
+    )
+      .then(() => {
+        console.log("Interview mail sent");
+      })
+      .catch((mailError) => {
+        console.log(
+          "Interview mail failed:",
+          mailError.message
+        );
+      });
 
     res.status(201).json(interview);
 
