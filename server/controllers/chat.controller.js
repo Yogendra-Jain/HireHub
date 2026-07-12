@@ -75,9 +75,9 @@ Use this to give personalized advice. Reference their specific skills and gaps.`
     // Call Groq with the full conversation history
     const chat = await groq.chat.completions.create({
       messages: groqMessages,
-      model:    "llama-3.3-70b-versatile",
+      model: "llama-3.3-70b-versatile",
       temperature: 0.7,
-      max_tokens:  800,
+      max_tokens: 800,
     });
 
     // Extract Groq's reply text

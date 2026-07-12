@@ -43,29 +43,51 @@ const scheduleInterview = async (req, res) => {
     });
 
     // Send email
-    await sendEmail(
-      application.candidate.email,
-      "Interview Scheduled",
-      `
-      <h2>Hello ${application.candidate.name}</h2>
+    try {
 
-      <p>Your interview has been scheduled.</p>
+      await sendEmail(
 
-      <p><b>Date:</b> ${date}</p>
+        application.candidate.email,
 
-      <p><b>Time:</b> ${time}</p>
+        "Interview Scheduled",
 
-      <p><b>Meeting Link:</b></p>
+        `
+    <h2>Hello ${application.candidate.name}</h2>
 
-      <a href="${meetingLink}">
-        Join Interview
-      </a>
+    <p>Your interview has been scheduled.</p>
 
-      <br><br>
+    <p>
+    <b>Date:</b> ${date}
+    </p>
 
-      <p>Please join 10 minutes early.</p>
-      `
-    );
+    <p>
+    <b>Time:</b> ${time}
+    </p>
+
+    <a href="${meetingLink}">
+    Join Interview
+    </a>
+
+    <br/>
+
+    <p>
+    Please join 10 minutes early.
+    </p>
+    `
+      );
+
+
+      console.log("Interview mail sent");
+
+
+    } catch (mailError) {
+
+      console.log(
+        "Interview mail failed:",
+        mailError.message
+      );
+
+    }
 
     res.status(201).json(interview);
 
@@ -93,8 +115,8 @@ const getMyInterviews = async (req, res) => {
       await Interview.find({
         candidate: req.user.id
       })
-      .populate("job", "title")
-      .sort({ createdAt: -1 });
+        .populate("job", "title")
+        .sort({ createdAt: -1 });
 
     res.status(200).json(interviews);
 
