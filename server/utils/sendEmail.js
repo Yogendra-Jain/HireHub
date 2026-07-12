@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const dns = require("dns");
+const dns = require("dns").promises;
 
 const sendEmail = async (to, subject, html) => {
   try {
@@ -8,17 +8,24 @@ const sendEmail = async (to, subject, html) => {
       throw new Error("Email credentials missing");
     }
 
+    // Dynamically resolve smtp.gmail.com to an IPv4 address to prevent IPv6 ENETUNREACH errors on Render
+    const addresses = await dns.resolve4("smtp.gmail.com");
+    if (!addresses || addresses.length === 0) {
+      throw new Error("Failed to resolve smtp.gmail.com to an IPv4 address");
+    }
+    const ipv4Host = addresses[0];
+
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      host: ipv4Host,
       port: 587,
       secure: false, // use STARTTLS
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
-      // Force IPv4 lookup during DNS resolution
-      lookup: (hostname, options, callback) => {
-        dns.lookup(hostname, { ...options, family: 4 }, callback);
+      tls: {
+        // Required so SSL validation matches the certificate domain instead of the raw IP
+        servername: "smtp.gmail.com",
       },
     });
 
