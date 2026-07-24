@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  Calendar,
+  Briefcase,
+  Search,
+  Upload,
+  MessageSquare,
+  PlusCircle,
+  List,
+  ChevronRight,
+  ArrowRight,
+} from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────
 // Dashboard Page
@@ -68,260 +82,282 @@ function Dashboard() {
     }
   };
 
+  // ── Helper: map application status to badge class ──────────
+  const getStatusBadgeClass = (status) => {
+    const s = status?.toLowerCase();
+    if (s === "applied")                         return "badge status-applied";
+    if (s === "reviewing" || s === "reviewed")    return "badge status-reviewedq";
+    if (s === "accepted" || s === "selected")     return "badge status-selected";
+    if (s === "rejected")                         return "badge status-rejected";
+    return "badge badge-neutral";
+  };
+
+  // ── Candidate stat counts ─────────────────────────────────
+  const totalApplied   = applications.length;
+  const inReviewCount  = applications.filter(
+    a => a.status === "Reviewing" || a.status === "Reviewed"
+  ).length;
+  const acceptedCount  = applications.filter(
+    a => a.status === "Accepted" || a.status === "Selected"
+  ).length;
+  const interviewCount = applications.filter(
+    a => a.status === "Interview" || a.status === "Scheduled"
+  ).length;
+
   // ── Render ──────────────────────────────────────────────────
   return (
-    <div style={{ background: "#0f1117", minHeight: "100vh", color: "white" }}>
-      <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className="page-container">
 
-        {/* Welcome message — shows first name only */}
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome back, {user?.name?.split(" ")[0]} 👋
+      {/* Welcome message — shows first name only */}
+      <div className="page-header">
+        <h1 className="page-title">
+          Welcome back, {user?.name?.split(" ")[0]}
         </h1>
-        <p className="mb-10" style={{ color: "#94a3b8" }}>
+        <p className="page-subtitle">
           {isRecruiter
             ? "Manage your job postings and find talent"
             : "Track your applications and find new jobs"}
         </p>
+      </div>
 
-        {/* ── Recruiter Section ── */}
-        {isRecruiter && (
-          <>
-            {/* Quick actions */}
-            <div className="flex gap-3 mb-10">
-              <Link
-                to="/create-job"
-                className="px-5 py-3 rounded-lg font-semibold text-sm"
-                style={{ background: "#22c55e", color: "#0f1117" }}
-              >
-                + Post New Job
-              </Link>
-              <Link
-                to="/recruiter-dashboard"
-                className="px-5 py-3 rounded-lg font-semibold text-sm"
-                style={{ background: "#1e2130", color: "white" }}
-              >
-                All My Jobs
-              </Link>
-            </div>
+      {/* ── Recruiter Section ── */}
+      {isRecruiter && (
+        <>
+          {/* Quick actions */}
+          <div className="flex gap-3 mb-8">
+            <Link to="/create-job" className="btn btn-primary">
+              <PlusCircle size={16} />
+              Post New Job
+            </Link>
+            <Link to="/recruiter-dashboard" className="btn btn-secondary">
+              <List size={16} />
+              All My Jobs
+            </Link>
+          </div>
 
-            {/* Job count stat */}
-            <div
-              className="rounded-xl p-6 mb-6"
-              style={{ background: "#13151c", border: "1px solid #1e2130" }}
-            >
-              <p className="text-sm mb-1" style={{ color: "#94a3b8" }}>
-                Total Jobs Posted
-              </p>
-              <p className="text-4xl font-bold">
-                {loading ? "—" : jobs.length}
-              </p>
-            </div>
-
-            {/* Recent jobs list */}
-            <h2 className="text-xl font-bold mb-4">Recent Jobs</h2>
-
-            {loading && (
-              <p style={{ color: "#64748b" }}>Loading...</p>
-            )}
-
-            {!loading && jobs.length === 0 && (
-              <div
-                className="rounded-xl p-8 text-center"
-                style={{ background: "#13151c", border: "1px dashed #1e2130" }}
-              >
-                <p className="mb-4" style={{ color: "#64748b" }}>
-                  No jobs posted yet
-                </p>
-                <Link
-                  to="/create-job"
-                  className="px-4 py-2 rounded-lg text-sm font-semibold"
-                  style={{ background: "#22c55e", color: "#0f1117" }}
-                >
-                  Post Your First Job
-                </Link>
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="stat-card">
+              <div className="stat-card-icon" style={{ background: "var(--primary-50)", color: "var(--primary)" }}>
+                <FileText size={20} />
               </div>
-            )}
+              <div className="stat-card-value">
+                {loading ? "—" : jobs.length}
+              </div>
+              <div className="stat-card-label">Total Jobs Posted</div>
+            </div>
+          </div>
 
-            {/* Show latest 3 jobs */}
-            {!loading && jobs.slice(0, 3).map(job => (
-              <div
-                key={job._id}
-                className="rounded-xl p-5 mb-3 flex items-center justify-between"
-                style={{ background: "#13151c", border: "1px solid #1e2130" }}
-              >
-                <div>
-                  <p className="font-semibold">{job.title}</p>
-                  <p className="text-sm" style={{ color: "#94a3b8" }}>
-                    {job.company} · {job.location}
-                  </p>
+          {/* Recent jobs list */}
+          <h2 className="text-xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>
+            Recent Jobs
+          </h2>
+
+          {/* Loading skeletons */}
+          {loading && (
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="card">
+                  <div className="card-body">
+                    <div className="skeleton" style={{ width: "60%", height: "20px" }} />
+                    <div className="skeleton mt-2" style={{ width: "40%", height: "16px" }} />
+                  </div>
                 </div>
-                <Link
-                  to={`/applicants/${job._id}`}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ background: "#22c55e", color: "#0f1117" }}
-                >
+              ))}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!loading && jobs.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <Briefcase size={32} />
+              </div>
+              <p className="empty-state-title">No jobs posted yet</p>
+              <p className="empty-state-text">
+                Create your first job listing to start finding candidates.
+              </p>
+              <Link to="/create-job" className="btn btn-primary mt-4">
+                Post Your First Job
+              </Link>
+            </div>
+          )}
+
+          {/* Show latest 3 jobs */}
+          {!loading && jobs.slice(0, 3).map(job => (
+            <div key={job._id} className="card card-interactive mb-3">
+              <div className="card-body flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="avatar avatar-md flex-center" style={{ background: "var(--primary-50)", color: "var(--primary)" }}>
+                    <Briefcase size={20} />
+                  </div>
+                  <div>
+                    <p className="font-semibold" style={{ color: "var(--text-primary)" }}>{job.title}</p>
+                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                      {job.company} · {job.location}
+                    </p>
+                  </div>
+                </div>
+                <Link to={`/applicants/${job._id}`} className="btn btn-primary btn-sm">
                   View Applicants
                 </Link>
               </div>
-            ))}
+            </div>
+          ))}
 
-            {/* Link to see all jobs */}
-            {jobs.length > 3 && (
-              <Link
-                to="/recruiter-dashboard"
-                className="block text-center text-sm mt-3"
-                style={{ color: "#22c55e" }}
-              >
-                View all {jobs.length} jobs →
-              </Link>
-            )}
-          </>
-        )}
+          {/* Link to see all jobs */}
+          {jobs.length > 3 && (
+            <Link
+              to="/recruiter-dashboard"
+              className="flex items-center justify-center gap-1 text-sm mt-4 font-medium"
+              style={{ color: "var(--primary)" }}
+            >
+              View all {jobs.length} jobs
+              <ArrowRight size={14} />
+            </Link>
+          )}
+        </>
+      )}
 
-        {/* ── Candidate Section ── */}
-        {!isRecruiter && (
-          <>
-            {/* Quick actions */}
-            <div className="flex gap-3 mb-10">
-              <Link
-                to="/jobs"
-                className="px-5 py-3 rounded-lg font-semibold text-sm"
-                style={{ background: "#22c55e", color: "#0f1117" }}
-              >
+      {/* ── Candidate Section ── */}
+      {!isRecruiter && (
+        <>
+          {/* Quick actions */}
+          <div className="flex flex-wrap gap-3 mb-8">
+            <Link to="/jobs" className="btn btn-primary">
+              <Search size={16} />
+              Browse Jobs
+            </Link>
+            <Link to="/profile" className="btn btn-secondary">
+              <Upload size={16} />
+              Upload Resume
+            </Link>
+            <Link to="/ai-chat" className="btn btn-accent">
+              <MessageSquare size={16} />
+              AI Chat
+            </Link>
+          </div>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {/* Total applied */}
+            <div className="stat-card">
+              <div className="stat-card-icon" style={{ background: "var(--primary-50)", color: "var(--primary)" }}>
+                <FileText size={20} />
+              </div>
+              <div className="stat-card-value">
+                {loading ? "—" : totalApplied}
+              </div>
+              <div className="stat-card-label">Applied</div>
+            </div>
+
+            {/* In review */}
+            <div className="stat-card">
+              <div className="stat-card-icon" style={{ background: "var(--warning-light)", color: "var(--warning)" }}>
+                <Clock size={20} />
+              </div>
+              <div className="stat-card-value">
+                {loading ? "—" : inReviewCount}
+              </div>
+              <div className="stat-card-label">In Review</div>
+            </div>
+
+            {/* Accepted */}
+            <div className="stat-card">
+              <div className="stat-card-icon" style={{ background: "var(--success-light)", color: "var(--success)" }}>
+                <CheckCircle size={20} />
+              </div>
+              <div className="stat-card-value">
+                {loading ? "—" : acceptedCount}
+              </div>
+              <div className="stat-card-label">Accepted</div>
+            </div>
+
+            {/* Interviews */}
+            <div className="stat-card">
+              <div className="stat-card-icon" style={{ background: "var(--info-light)", color: "var(--info)" }}>
+                <Calendar size={20} />
+              </div>
+              <div className="stat-card-value">
+                {loading ? "—" : interviewCount}
+              </div>
+              <div className="stat-card-label">Interviews</div>
+            </div>
+          </div>
+
+          {/* Recent applications */}
+          <h2 className="text-xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>
+            Recent Applications
+          </h2>
+
+          {/* Loading skeletons */}
+          {loading && (
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="card">
+                  <div className="card-body">
+                    <div className="skeleton" style={{ width: "60%", height: "20px" }} />
+                    <div className="skeleton mt-2" style={{ width: "40%", height: "16px" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!loading && applications.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <Search size={32} />
+              </div>
+              <p className="empty-state-title">No applications yet</p>
+              <p className="empty-state-text">
+                Start exploring open positions and submit your first application.
+              </p>
+              <Link to="/jobs" className="btn btn-primary mt-4">
                 Browse Jobs
               </Link>
-              <Link
-                to="/profile"
-                className="px-5 py-3 rounded-lg font-semibold text-sm"
-                style={{ background: "#1d4ed8", color: "white" }}
-              >
-                Upload Resume
-              </Link>
-              <Link
-                to="/ai-chat"
-                className="px-5 py-3 rounded-lg font-semibold text-sm"
-                style={{ background: "#7c3aed", color: "white" }}
-              >
-                AI Chat
-              </Link>
             </div>
+          )}
 
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              {/* Total applied */}
-              <div
-                className="rounded-xl p-5"
-                style={{ background: "#13151c", border: "1px solid #1e2130" }}
-              >
-                <p className="text-sm mb-1" style={{ color: "#94a3b8" }}>
-                  Applied
-                </p>
-                <p className="text-3xl font-bold">
-                  {loading ? "—" : applications.length}
-                </p>
-              </div>
-
-              {/* In review */}
-              <div
-                className="rounded-xl p-5"
-                style={{ background: "#13151c", border: "1px solid #1e2130" }}
-              >
-                <p className="text-sm mb-1" style={{ color: "#94a3b8" }}>
-                  In Review
-                </p>
-                <p className="text-3xl font-bold" style={{ color: "#38bdf8" }}>
-                  {loading
-                    ? "—"
-                    : applications.filter(
-                        a => a.status === "Reviewing" || a.status === "Reviewed"
-                      ).length}
-                </p>
-              </div>
-
-              {/* Accepted */}
-              <div
-                className="rounded-xl p-5"
-                style={{ background: "#13151c", border: "1px solid #1e2130" }}
-              >
-                <p className="text-sm mb-1" style={{ color: "#94a3b8" }}>
-                  Accepted
-                </p>
-                <p className="text-3xl font-bold" style={{ color: "#22c55e" }}>
-                  {loading
-                    ? "—"
-                    : applications.filter(
-                        a => a.status === "Accepted" || a.status === "Selected"
-                      ).length}
-                </p>
-              </div>
-            </div>
-
-            {/* Recent applications */}
-            <h2 className="text-xl font-bold mb-4">Recent Applications</h2>
-
-            {loading && (
-              <p style={{ color: "#64748b" }}>Loading...</p>
-            )}
-
-            {!loading && applications.length === 0 && (
-              <div
-                className="rounded-xl p-8 text-center"
-                style={{ background: "#13151c", border: "1px dashed #1e2130" }}
-              >
-                <p className="mb-4" style={{ color: "#64748b" }}>
-                  No applications yet
-                </p>
-                <Link
-                  to="/jobs"
-                  className="px-4 py-2 rounded-lg text-sm font-semibold"
-                  style={{ background: "#22c55e", color: "#0f1117" }}
-                >
-                  Browse Jobs
-                </Link>
-              </div>
-            )}
-
-            {/* Show latest 3 applications */}
-            {!loading && applications.slice(0, 3).map(app => (
-              <div
-                key={app._id}
-                className="rounded-xl p-5 mb-3 flex items-center justify-between"
-                style={{ background: "#13151c", border: "1px solid #1e2130" }}
-              >
-                <div>
-                  <p className="font-semibold">{app.job?.title}</p>
-                  <p className="text-sm" style={{ color: "#94a3b8" }}>
-                    {app.job?.company}
-                  </p>
+          {/* Show latest 3 applications */}
+          {!loading && applications.slice(0, 3).map(app => (
+            <div key={app._id} className="card card-interactive mb-3">
+              <div className="card-body flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="avatar avatar-md flex-center" style={{ background: "var(--bg-secondary)", color: "var(--text-secondary)" }}>
+                    <Briefcase size={20} />
+                  </div>
+                  <div>
+                    <p className="font-semibold" style={{ color: "var(--text-primary)" }}>{app.job?.title}</p>
+                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                      {app.job?.company}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Status badge */}
-                <span
-                  className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{
-                    background: app.status === "Rejected" ? "#3a1a1a" : "#1a2f1a",
-                    color:      app.status === "Rejected" ? "#f87171" : "#4ade80",
-                  }}
-                >
+                <span className={getStatusBadgeClass(app.status)}>
                   {app.status}
                 </span>
               </div>
-            ))}
+            </div>
+          ))}
 
-            {/* Link to see all applications */}
-            {applications.length > 3 && (
-              <Link
-                to="/my-applications"
-                className="block text-center text-sm mt-3"
-                style={{ color: "#22c55e" }}
-              >
-                View all {applications.length} applications →
-              </Link>
-            )}
-          </>
-        )}
+          {/* Link to see all applications */}
+          {applications.length > 3 && (
+            <Link
+              to="/my-applications"
+              className="flex items-center justify-center gap-1 text-sm mt-4 font-medium"
+              style={{ color: "var(--primary)" }}
+            >
+              View all {applications.length} applications
+              <ArrowRight size={14} />
+            </Link>
+          )}
+        </>
+      )}
 
-      </div>
     </div>
   );
 }

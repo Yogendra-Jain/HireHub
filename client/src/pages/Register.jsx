@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AlertCircle, UserRound, Building2, Briefcase } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────
 // Register Page
@@ -11,30 +12,8 @@ import axios from "axios";
 //   3. Role selection uses visual cards instead of a <select> dropdown
 //   4. Loading state on submit button
 //   5. Redirect to correct dashboard after register based on role
-//   6. Split layout with branding panel (matches Login page style)
+//   6. Clean centered card layout matching Login page style
 // ─────────────────────────────────────────────────────────────
-
-function InputField({ label, type, name, placeholder, value, onChange }) {
-  return (
-    <div className="mb-5">
-      <label className="block text-sm font-medium mb-2" style={{ color: "#a5b4fc" }}>
-        {label}
-      </label>
-      <input
-        type={type}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        required
-        className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-        style={{ background: "#0f1629", border: "1px solid #1e2a4a", color: "white" }}
-        onFocus={e => e.target.style.borderColor = "#6366f1"}
-        onBlur={e  => e.target.style.borderColor = "#1e2a4a"}
-      />
-    </div>
-  );
-}
 
 function Register() {
   const navigate = useNavigate();
@@ -94,193 +73,131 @@ function Register() {
       <button
         type="button"
         onClick={() => setRole(value)}
-        className="flex-1 p-4 rounded-xl text-left transition-all"
+        className="card flex-1 text-left"
         style={{
-          background:  isSelected ? "#1e1b4b" : "#0f1629",
-          border:      `2px solid ${isSelected ? "#6366f1" : "#1e2a4a"}`,
-          cursor:      "pointer",
+          padding: "1rem",
+          border: `2px solid ${isSelected ? "var(--primary)" : "var(--border)"}`,
+          background: isSelected ? "var(--primary-50)" : "var(--bg-card)",
+          cursor: "pointer",
+          transition: "all 0.15s ease",
         }}
       >
-        <div className="text-xl mb-2">{icon}</div>
-        <p className="font-semibold text-sm text-white mb-1">{title}</p>
-        <p className="text-xs" style={{ color: "#64748b" }}>{description}</p>
+        <div style={{ color: isSelected ? "var(--primary)" : "var(--text-muted)", marginBottom: 8 }}>
+          {icon}
+        </div>
+        <p style={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--text-primary)", marginBottom: 2 }}>{title}</p>
+        <p style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{description}</p>
       </button>
     );
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#070b18" }}>
+    <div className="auth-page">
+      <div className="auth-card" style={{ maxWidth: 480 }}>
 
-      {/* ── Left Panel (branding) ── */}
-      <div
-        className="hidden lg:flex flex-col justify-between w-1/2 p-14"
-        style={{
-          background:  "linear-gradient(135deg, #0d1117 0%, #0f1629 50%, #141832 100%)",
-          borderRight: "1px solid #1e2a4a",
-        }}
-      >
         {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center font-bold"
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white" }}
-          >
-            H
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="navbar-brand-icon">
+            <Briefcase size={18} />
           </div>
-          <span className="font-bold text-xl text-white">
-            HireHub <span style={{ color: "#6366f1" }}>AI</span>
-          </span>
+          <span className="navbar-brand-text">HireHub</span>
         </div>
 
-        {/* Stats */}
-        <div>
-          <h2 className="text-4xl font-bold text-white mb-6 leading-tight">
-            Join thousands of<br />professionals
-          </h2>
+        <h1 className="auth-title">Create your account</h1>
+        <p className="auth-subtitle">It's free. No credit card required.</p>
 
-          {/* Feature grid */}
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { icon: "🎯", label: "Smart Matching",    desc: "AI matches your skills to jobs" },
-              { icon: "📄", label: "Resume AI",         desc: "Get scored and improve your CV" },
-              { icon: "🎤", label: "Interview Prep",    desc: "Practice with AI questions" },
-              { icon: "💬", label: "Career Chat",       desc: "Get 24/7 AI career advice" },
-            ].map((f, i) => (
-              <div
-                key={i}
-                className="p-4 rounded-xl"
-                style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-              >
-                <div className="text-2xl mb-2">{f.icon}</div>
-                <p className="font-semibold text-sm text-white">{f.label}</p>
-                <p className="text-xs mt-1" style={{ color: "#64748b" }}>{f.desc}</p>
-              </div>
-            ))}
+        {/* Inline error */}
+        {error && (
+          <div className="toast toast-error mb-5">
+            <AlertCircle size={16} />
+            {error}
           </div>
-        </div>
+        )}
 
-        {/* Bottom note */}
-        <p className="text-sm" style={{ color: "#475569" }}>
-          Free forever for candidates. Post jobs as a recruiter.
-        </p>
-      </div>
+        <form onSubmit={handleSubmit}>
 
-      {/* ── Right Panel (register form) ── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
-
-          {/* Mobile brand */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
-              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white" }}
-            >H</div>
-            <span className="font-bold text-lg text-white">
-              HireHub <span style={{ color: "#6366f1" }}>AI</span>
-            </span>
+          {/* Role Selection Cards */}
+          <div className="input-group">
+            <label className="input-label">I am a...</label>
+            <div className="flex gap-3">
+              <RoleCard
+                value="candidate"
+                icon={<UserRound size={22} />}
+                title="Candidate"
+                description="Looking for a job"
+              />
+              <RoleCard
+                value="recruiter"
+                icon={<Building2 size={22} />}
+                title="Recruiter"
+                description="Hiring talent"
+              />
+            </div>
           </div>
 
-          {/* Heading */}
-          <h1 className="text-3xl font-bold text-white mb-2">Create your account</h1>
-          <p className="text-sm mb-8" style={{ color: "#64748b" }}>
-            It's free. No credit card required.
-          </p>
-
-          {/* Inline error */}
-          {error && (
-            <div
-              className="mb-5 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
-              style={{ background: "#2a1a1a", border: "1px solid #991b1b", color: "#f87171" }}
-            >
-              <span>⚠</span> {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-
-            {/* Role Selection Cards — nicer than a dropdown */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-3" style={{ color: "#a5b4fc" }}>
-                I am a...
-              </label>
-              <div className="flex gap-3">
-                <RoleCard
-                  value="candidate"
-                  icon="🧑‍💻"
-                  title="Candidate"
-                  description="Looking for a job"
-                />
-                <RoleCard
-                  value="recruiter"
-                  icon="🏢"
-                  title="Recruiter"
-                  description="Hiring talent"
-                />
-              </div>
-            </div>
-
-            <InputField
-              label="Full name"
+          <div className="input-group">
+            <label className="input-label">Full name</label>
+            <input
               type="text"
               name="name"
               placeholder="John Smith"
               value={formData.name}
               onChange={handleChange}
+              required
+              className="input-field"
             />
-            <InputField
-              label="Email address"
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Email address</label>
+            <input
               type="email"
               name="email"
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
+              required
+              className="input-field"
             />
-            <InputField
-              label="Password"
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Password</label>
+            <input
               type="password"
               name="password"
               placeholder="At least 6 characters"
               value={formData.password}
               onChange={handleChange}
+              required
+              className="input-field"
             />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-sm transition-all mt-2"
-              style={{
-                background: loading ? "#3730a3" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                color:      "white",
-                opacity:    loading ? 0.8 : 1,
-                cursor:     loading ? "not-allowed" : "pointer",
-              }}
-            >
-              {loading ? "Creating account..." : "Create Account"}
-            </button>
-          </form>
-
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px" style={{ background: "#1e2a4a" }} />
-            <span className="text-xs" style={{ color: "#475569" }}>OR</span>
-            <div className="flex-1 h-px" style={{ background: "#1e2a4a" }} />
           </div>
 
-          <p className="text-center text-sm" style={{ color: "#64748b" }}>
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-semibold"
-              style={{ color: "#6366f1" }}
-              onMouseEnter={e => e.target.style.color = "#818cf8"}
-              onMouseLeave={e => e.target.style.color = "#6366f1"}
-            >
-              Sign in
-            </Link>
-          </p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-full mt-2"
+            style={{ padding: "0.75rem" }}
+          >
+            {loading ? "Creating account..." : "Create Account"}
+          </button>
+        </form>
 
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1" style={{ height: 1, background: "var(--border)" }} />
+          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>OR</span>
+          <div className="flex-1" style={{ height: 1, background: "var(--border)" }} />
         </div>
-      </div>
 
+        <p className="text-center" style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
+          Already have an account?{" "}
+          <Link to="/login" style={{ color: "var(--primary)", fontWeight: 600 }}>
+            Sign in
+          </Link>
+        </p>
+
+      </div>
     </div>
   );
 }

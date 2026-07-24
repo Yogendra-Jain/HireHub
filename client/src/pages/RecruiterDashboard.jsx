@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import {
+  ClipboardList,
+  MapPin,
+  Users,
+  PlusCircle,
+  Briefcase,
+  Eye,
+  Sparkles,
+  Trash2,
+  Calendar,
+} from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────
 // RecruiterDashboard
@@ -62,172 +73,158 @@ function RecruiterDashboard() {
     (sum, job) => sum + (job.applicantCount || 0), 0
   );
 
-  return (
-    <div style={{ background: "#070b18", minHeight: "100vh", color: "white" }}>
-      <div className="max-w-5xl mx-auto px-6 py-10">
+  // ── Helper: map job type to badge class ─────────────────────
+  const getJobTypeBadgeClass = (type) => {
+    const t = type?.toLowerCase();
+    if (t === "full-time" || t === "full time") return "badge job-type-fulltime";
+    if (t === "part-time" || t === "part time") return "badge job-type-parttime";
+    if (t === "contract")                       return "badge job-type-contract";
+    if (t === "internship")                     return "badge job-type-internship";
+    if (t === "remote")                         return "badge job-type-remote";
+    return "badge badge-neutral";
+  };
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-1">Recruiter Dashboard</h1>
-            <p style={{ color: "#64748b" }}>Manage your job postings and applicants</p>
+  return (
+    <div className="page-container">
+
+      {/* Header */}
+      <div className="page-header flex items-center justify-between">
+        <div>
+          <h1 className="page-title">Recruiter Dashboard</h1>
+          <p className="page-subtitle">Manage your job postings and applicants</p>
+        </div>
+        <Link to="/create-job" className="btn btn-primary">
+          <PlusCircle size={16} />
+          Post New Job
+        </Link>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="stat-card">
+          <div className="stat-card-icon" style={{ background: "var(--primary-50)", color: "var(--primary)" }}>
+            <ClipboardList size={20} />
           </div>
-          <Link
-            to="/create-job"
-            className="px-5 py-2.5 rounded-xl font-semibold text-sm"
-            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white" }}
-          >
-            + Post New Job
+          <div className="stat-card-value">{loading ? "—" : jobs.length}</div>
+          <div className="stat-card-label">Jobs Posted</div>
+        </div>
+
+        {/* Total applications — now works because backend sends applicantCount */}
+        <div className="stat-card">
+          <div className="stat-card-icon" style={{ background: "var(--info-light)", color: "var(--info)" }}>
+            <Users size={20} />
+          </div>
+          <div className="stat-card-value">{loading ? "—" : totalApplications}</div>
+          <div className="stat-card-label">Total Applications</div>
+        </div>
+      </div>
+
+      {/* Loading skeletons */}
+      {loading && (
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="card">
+              <div className="card-body">
+                <div className="skeleton" style={{ width: "50%", height: "22px" }} />
+                <div className="skeleton mt-2" style={{ width: "35%", height: "16px" }} />
+                <div className="flex gap-2 mt-4">
+                  <div className="skeleton" style={{ width: "80px", height: "24px", borderRadius: "var(--radius-full)" }} />
+                  <div className="skeleton" style={{ width: "80px", height: "24px", borderRadius: "var(--radius-full)" }} />
+                </div>
+                <div className="skeleton mt-4" style={{ width: "100%", height: "14px" }} />
+                <div className="skeleton mt-1" style={{ width: "70%", height: "14px" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!loading && jobs.length === 0 && (
+        <div className="empty-state">
+          <div className="empty-state-icon">
+            <ClipboardList size={32} />
+          </div>
+          <p className="empty-state-title">No jobs posted yet</p>
+          <p className="empty-state-text">
+            Post your first job to start finding candidates
+          </p>
+          <Link to="/create-job" className="btn btn-primary mt-4">
+            Post First Job
           </Link>
         </div>
+      )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-10">
-          <div
-            className="rounded-2xl p-6"
-            style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-          >
-            <p className="text-sm mb-1" style={{ color: "#64748b" }}>Jobs Posted</p>
-            <p className="text-4xl font-bold">{loading ? "—" : jobs.length}</p>
-          </div>
-
-          {/* Total applications — now works because backend sends applicantCount */}
-          <div
-            className="rounded-2xl p-6"
-            style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-          >
-            <p className="text-sm mb-1" style={{ color: "#64748b" }}>Total Applications</p>
-            <p className="text-4xl font-bold" style={{ color: "#a5b4fc" }}>
-              {loading ? "—" : totalApplications}
-            </p>
-          </div>
-        </div>
-
-        {/* Loading skeletons */}
-        {loading && (
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div
-                key={i}
-                className="h-40 rounded-2xl animate-pulse"
-                style={{ background: "#0d1117" }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!loading && jobs.length === 0 && (
-          <div
-            className="text-center py-16 rounded-2xl"
-            style={{ background: "#0d1117", border: "1px dashed #1e2a4a" }}
-          >
-            <p className="text-4xl mb-3">📋</p>
-            <p className="font-semibold text-lg mb-2">No jobs posted yet</p>
-            <p className="text-sm mb-6" style={{ color: "#64748b" }}>
-              Post your first job to start finding candidates
-            </p>
-            <Link
-              to="/create-job"
-              className="inline-block px-5 py-2.5 rounded-xl font-semibold text-sm"
-              style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white" }}
-            >
-              Post First Job
-            </Link>
-          </div>
-        )}
-
-        {/* Job cards */}
-        {!loading && jobs.map(job => (
-          <div
-            key={job._id}
-            className="rounded-2xl p-6 mb-4 transition-all"
-            style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = "#4f46e5"}
-            onMouseLeave={e => e.currentTarget.style.borderColor = "#1e2a4a"}
-          >
+      {/* Job cards */}
+      {!loading && jobs.map(job => (
+        <div key={job._id} className="card card-interactive mb-4">
+          <div className="card-body">
             {/* Top row: title + posted date */}
             <div className="flex items-start justify-between mb-3">
               <div>
-                <h2 className="text-xl font-bold mb-0.5">{job.title}</h2>
-                <p style={{ color: "#94a3b8" }}>{job.company}</p>
+                <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                  {job.title}
+                </h2>
+                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  {job.company}
+                </p>
               </div>
-              <p className="text-xs" style={{ color: "#475569" }}>
+              <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                <Calendar size={12} />
                 {new Date(job.createdAt).toLocaleDateString("en-US", {
                   month: "short", day: "numeric", year: "numeric",
                 })}
-              </p>
+              </div>
             </div>
 
             {/* Badges row */}
-            <div className="flex flex-wrap gap-2 mb-5">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
               {/* Job type */}
-              <span
-                className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: "#1e1b4b", color: "#a5b4fc", border: "1px solid #4f46e5" }}
-              >
+              <span className={getJobTypeBadgeClass(job.jobType)}>
                 {job.jobType}
               </span>
 
               {/* Experience level */}
-              <span
-                className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: "#0f1b2d", color: "#38bdf8", border: "1px solid #0369a1" }}
-              >
+              <span className="badge badge-info">
                 {job.experienceLevel}
               </span>
 
               {/* Location */}
-              <span className="text-xs flex items-center gap-1" style={{ color: "#64748b" }}>
-                📍 {job.location}
+              <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
+                <MapPin size={12} />
+                {job.location}
               </span>
 
               {/* Applicant count — the main fix */}
-              <span
-                className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: "#0d2f1a", color: "#4ade80", border: "1px solid #166534" }}
-              >
-                👥 {job.applicantCount || 0} applicant{job.applicantCount !== 1 ? "s" : ""}
+              <span className="badge badge-success flex items-center gap-1">
+                <Users size={12} />
+                {job.applicantCount || 0} applicant{job.applicantCount !== 1 ? "s" : ""}
               </span>
             </div>
 
             {/* Description preview */}
-            <p
-              className="text-sm mb-5 line-clamp-2"
-              style={{ color: "#64748b" }}
-            >
+            <p className="text-sm text-clamp-2 mb-4" style={{ color: "var(--text-secondary)" }}>
               {job.description}
             </p>
 
             {/* Action buttons */}
-            <div
-              className="flex flex-wrap gap-2 pt-4"
-              style={{ borderTop: "1px solid #1e2a4a" }}
-            >
+            <div className="divider" />
+            <div className="flex flex-wrap items-center gap-2 pt-1">
               {/* View full job */}
-              <Link
-                to={`/jobs/${job._id}`}
-                className="px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                style={{ background: "#1e1b4b", color: "#a5b4fc", border: "1px solid #4f46e5" }}
-              >
+              <Link to={`/jobs/${job._id}`} className="btn btn-ghost btn-sm">
+                <Eye size={14} />
                 View Job
               </Link>
 
               {/* Manage applicants */}
-              <Link
-                to={`/applicants/${job._id}`}
-                className="px-4 py-2 rounded-lg text-xs font-semibold"
-                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white" }}
-              >
+              <Link to={`/applicants/${job._id}`} className="btn btn-primary btn-sm">
+                <Users size={14} />
                 Manage Applicants
               </Link>
 
               {/* AI ranking */}
-              <Link
-                to={`/applicants-dashboard/${job._id}`}
-                className="px-4 py-2 rounded-lg text-xs font-semibold"
-                style={{ background: "#2a1a3a", color: "#c084fc", border: "1px solid #7c3aed" }}
-              >
+              <Link to={`/applicants-dashboard/${job._id}`} className="btn btn-ghost btn-sm">
+                <Sparkles size={14} />
                 AI Ranking
               </Link>
 
@@ -235,22 +232,16 @@ function RecruiterDashboard() {
               <button
                 onClick={() => handleDelete(job._id)}
                 disabled={deletingId === job._id}
-                className="px-4 py-2 rounded-lg text-xs font-semibold ml-auto transition-all"
-                style={{
-                  background: "#2a1a1a",
-                  color:      "#f87171",
-                  border:     "1px solid #991b1b",
-                  opacity:    deletingId === job._id ? 0.5 : 1,
-                  cursor:     deletingId === job._id ? "not-allowed" : "pointer",
-                }}
+                className={`btn btn-danger btn-sm ml-auto ${deletingId === job._id ? "opacity-50 cursor-not-allowed" : ""}`}
               >
+                <Trash2 size={14} />
                 {deletingId === job._id ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
-        ))}
+        </div>
+      ))}
 
-      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { Bot, Send, AlertTriangle, MessageSquare } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────
 // AIChat Page — Career Assistant Chat
@@ -85,7 +86,7 @@ function AIChat() {
       const errText = error.response?.data?.message || "Something went wrong. Please try again.";
       setMessages([
         ...updatedMessages,
-        { role: "assistant", content: `⚠️ ${errText}` },
+        { role: "assistant", content: errText },
       ]);
     } finally {
       setLoading(false);
@@ -102,42 +103,36 @@ function AIChat() {
 
   // ── Render ────────────────────────────────────────────────
   return (
-    <div
-      style={{ background: "#0f1117", minHeight: "100vh", color: "white" }}
-      className="flex flex-col"
-    >
-      <div className="max-w-3xl mx-auto w-full px-6 py-10 flex flex-col flex-1">
+    <div className="page-container-narrow flex flex-col" style={{ minHeight: 'calc(100vh - var(--navbar-height))' }}>
 
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-1">AI Career Assistant</h1>
-          <p style={{ color: "#94a3b8" }} className="text-sm">
-            Ask me anything about your career, resume, interview prep, or job search.
-          </p>
-        </div>
+      {/* Header */}
+      <div className="page-header">
+        <h1 className="page-title">AI Career Assistant</h1>
+        <p className="page-subtitle">
+          Ask me anything about your career, resume, interview prep, or job search.
+        </p>
+      </div>
 
-        {/* Chat Window */}
-        <div
-          className="flex-1 rounded-xl p-5 overflow-y-auto mb-4"
-          style={{
-            background: "#13151c",
-            border:     "1px solid #1e2130",
-            minHeight:  "400px",
-            maxHeight:  "60vh",
-          }}
-        >
+      {/* Chat Window */}
+      <div
+        className="card flex-1 overflow-y-auto mb-4"
+        style={{ minHeight: "400px", maxHeight: "60vh" }}
+      >
+        <div className="card-body">
 
           {/* Empty state — shown when no messages yet */}
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className="text-4xl mb-4">🤖</div>
-              <p className="font-semibold mb-2">Your AI Career Assistant</p>
-              <p className="text-sm" style={{ color: "#64748b" }}>
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <Bot size={28} />
+              </div>
+              <p className="empty-state-title">Your AI Career Assistant</p>
+              <p className="empty-state-text">
                 Ask me about your resume, job search, interview tips, or salary negotiation.
               </p>
 
               {/* Suggested prompts */}
-              <div className="mt-6 flex flex-col gap-2 w-full max-w-sm">
+              <div className="mt-6 flex flex-col gap-2 w-full max-w-sm mx-auto">
                 {[
                   "What skills should I add to my resume?",
                   "How do I prepare for a React interview?",
@@ -146,22 +141,10 @@ function AIChat() {
                   <button
                     key={prompt}
                     onClick={() => setInput(prompt)}
-                    className="px-4 py-2 rounded-lg text-sm text-left transition-colors"
-                    style={{
-                      background: "#1a1f2e",
-                      color:      "#94a3b8",
-                      border:     "1px solid #1e2130",
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.borderColor = "#22c55e";
-                      e.currentTarget.style.color = "#22c55e";
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.borderColor = "#1e2130";
-                      e.currentTarget.style.color = "#94a3b8";
-                    }}
+                    className="tag text-left cursor-pointer px-4 py-2 text-sm"
                   >
-                    {prompt}
+                    <MessageSquare size={14} className="flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
+                    <span className="ml-2">{prompt}</span>
                   </button>
                 ))}
               </div>
@@ -176,36 +159,22 @@ function AIChat() {
             >
               {/* AI avatar — shown on the left for assistant messages */}
               {msg.role === "assistant" && (
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mr-2 mt-1"
-                  style={{ background: "#1a2f1a", color: "#22c55e" }}
-                >
-                  AI
+                <div className="avatar avatar-sm mr-2 mt-1" style={{ background: 'var(--primary)' }}>
+                  <Bot size={16} />
                 </div>
               )}
 
               {/* Message bubble */}
               <div
-                className="max-w-[75%] px-4 py-3 rounded-2xl text-sm"
-                style={{
-                  background:   msg.role === "user" ? "#22c55e" : "#1a1f2e",
-                  color:        msg.role === "user" ? "#0f1117" : "#e2e8f0",
-                  borderRadius: msg.role === "user"
-                    ? "18px 18px 4px 18px"  // user bubble: flat bottom-right
-                    : "18px 18px 18px 4px", // AI bubble: flat bottom-left
-                  lineHeight: "1.6",
-                  whiteSpace: "pre-wrap",   // preserves line breaks in AI responses
-                }}
+                className={msg.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"}
+                style={{ whiteSpace: "pre-wrap" }}
               >
                 {msg.content}
               </div>
 
               {/* User avatar — shown on the right for user messages */}
               {msg.role === "user" && (
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ml-2 mt-1"
-                  style={{ background: "#1a2f1a", color: "#22c55e" }}
-                >
+                <div className="avatar avatar-sm ml-2 mt-1">
                   {JSON.parse(localStorage.getItem("user"))?.name?.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -215,25 +184,18 @@ function AIChat() {
           {/* Typing indicator — shown while waiting for Groq */}
           {loading && (
             <div className="flex justify-start mb-4">
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mr-2"
-                style={{ background: "#1a2f1a", color: "#22c55e" }}
-              >
-                AI
+              <div className="avatar avatar-sm mr-2" style={{ background: 'var(--primary)' }}>
+                <Bot size={16} />
               </div>
-              <div
-                className="px-4 py-3 rounded-2xl text-sm flex items-center gap-1"
-                style={{ background: "#1a1f2e", borderRadius: "18px 18px 18px 4px" }}
-              >
+              <div className="chat-bubble-ai flex items-center gap-1">
                 {/* Three animated dots to indicate typing */}
                 {[0, 1, 2].map(i => (
                   <span
                     key={i}
-                    className="w-2 h-2 rounded-full animate-bounce"
+                    className="w-2 h-2 rounded-full animate-bounce inline-block"
                     style={{
-                      background:       "#22c55e",
-                      animationDelay:   `${i * 0.15}s`,
-                      display:          "inline-block",
+                      background:     'var(--primary)',
+                      animationDelay: `${i * 0.15}s`,
                     }}
                   />
                 ))}
@@ -244,12 +206,11 @@ function AIChat() {
           {/* Invisible div at the bottom — we scroll here on new messages */}
           <div ref={bottomRef} />
         </div>
+      </div>
 
-        {/* Input Area */}
-        <div
-          className="flex gap-3 items-end p-3 rounded-xl"
-          style={{ background: "#13151c", border: "1px solid #1e2130" }}
-        >
+      {/* Input Area */}
+      <div className="card">
+        <div className="flex gap-3 items-end p-3">
           {/* Textarea — grows with content, Enter sends */}
           <textarea
             value={input}
@@ -257,31 +218,26 @@ function AIChat() {
             onKeyDown={handleKeyDown}
             placeholder="Ask anything about your career… (Enter to send)"
             rows={1}
-            className="flex-1 bg-transparent outline-none resize-none text-sm py-2"
-            style={{ color: "white", lineHeight: "1.5" }}
+            className="input-field flex-1 resize-none"
+            style={{ border: 'none', boxShadow: 'none' }}
           />
 
           {/* Send button */}
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="px-4 py-2 rounded-lg font-semibold text-sm flex-shrink-0 transition-all"
-            style={{
-              background: loading || !input.trim() ? "#1e2130" : "#22c55e",
-              color:      loading || !input.trim() ? "#64748b"  : "#0f1117",
-              cursor:     loading || !input.trim() ? "not-allowed" : "pointer",
-            }}
+            className="btn btn-primary btn-icon flex-shrink-0"
           >
-            {loading ? "..." : "Send"}
+            <Send size={18} />
           </button>
         </div>
-
-        {/* Hint text */}
-        <p className="text-xs mt-2 text-center" style={{ color: "#475569" }}>
-          Press Enter to send · Shift+Enter for new line
-        </p>
-
       </div>
+
+      {/* Hint text */}
+      <p className="text-xs mt-2 text-center" style={{ color: 'var(--text-muted)' }}>
+        Press Enter to send · Shift+Enter for new line
+      </p>
+
     </div>
   );
 }

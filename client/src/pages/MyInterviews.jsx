@@ -1,22 +1,33 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  CheckCircle,
+  RefreshCw,
+  XCircle,
+  Target,
+  Hourglass,
+  Timer,
+  Calendar,
+  Clock,
+  Video,
+  Inbox,
+  Lightbulb,
+  ExternalLink,
+} from "lucide-react";
 
-const STATUS_STYLES = {
-  Scheduled: { bg: "#0d2f1a", color: "#4ade80", border: "#166534", icon: "✅" },
-  Rescheduled: { bg: "#0f1b2d", color: "#38bdf8", border: "#0369a1", icon: "🔄" },
-  Cancelled: { bg: "#2a1a1a", color: "#f87171", border: "#991b1b", icon: "❌" },
-  Completed: { bg: "#1e1b4b", color: "#a5b4fc", border: "#4f46e5", icon: "🎯" },
+const STATUS_CONFIG = {
+  Scheduled:   { className: "status-scheduled",   Icon: CheckCircle },
+  Rescheduled: { className: "status-rescheduled", Icon: RefreshCw },
+  Cancelled:   { className: "status-cancelled",   Icon: XCircle },
+  Completed:   { className: "status-completed",   Icon: Target },
 };
 
 function StatusBadge({ status }) {
-  const s = STATUS_STYLES[status] || { bg: "#1e2a4a", color: "#94a3b8", border: "#2a3a5a", icon: "⏳" };
+  const config = STATUS_CONFIG[status] || { className: "badge-neutral", Icon: Hourglass };
+  const { className, Icon } = config;
   return (
-    <span style={{
-      padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600,
-      background: s.bg, color: s.color, border: `1px solid ${s.border}`,
-      display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap"
-    }}>
-      <span>{s.icon}</span> {status}
+    <span className={`badge ${className}`}>
+      <Icon size={12} /> {status}
     </span>
   );
 }
@@ -44,7 +55,11 @@ function CountdownTimer({ dateStr, timeStr }) {
   }, [dateStr, timeStr]);
 
   if (!countdown) return null;
-  return <span style={{ fontSize: 12, color: "#fbbf24", fontWeight: 600 }}>⏰ {countdown}</span>;
+  return (
+    <span className="flex items-center gap-1 text-xs font-semibold text-[var(--warning)]">
+      <Timer size={13} /> {countdown}
+    </span>
+  );
 }
 
 function MyInterviews() {
@@ -94,170 +109,158 @@ function MyInterviews() {
   const nextInterview = upcoming[upcoming.length - 1] || upcoming[0];
 
   return (
-    <div style={{ background: "#070b18", minHeight: "100vh", color: "white" }}>
-      <div style={{ maxWidth: 820, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="page-container-narrow">
 
-        {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 6px", letterSpacing: "-0.5px" }}>
-            My Interviews
-          </h1>
-          <p style={{ color: "#64748b", margin: 0, fontSize: 14 }}>
-            {interviews.length > 0
-              ? `${upcoming.length} upcoming · ${interviews.length} total`
-              : "Your scheduled interviews will appear here"}
+      {/* Header */}
+      <div className="page-header">
+        <h1 className="page-title">My Interviews</h1>
+        <p className="page-subtitle">
+          {interviews.length > 0
+            ? `${upcoming.length} upcoming · ${interviews.length} total`
+            : "Your scheduled interviews will appear here"}
+        </p>
+      </div>
+
+      {/* Next interview spotlight */}
+      {!loading && nextInterview && (
+        <div
+          className="card card-body mb-7"
+          style={{ borderLeft: '3px solid var(--primary)' }}
+        >
+          <p className="text-xs font-bold uppercase tracking-wider text-[var(--primary)] mb-3">
+            Next interview
           </p>
-        </div>
-
-        {/* Next interview spotlight */}
-        {!loading && nextInterview && (
-          <div style={{
-            background: "linear-gradient(135deg, #1e1b4b 0%, #0d2f1a 100%)",
-            border: "1px solid #4f46e5", borderRadius: 16, padding: 24, marginBottom: 28
-          }}>
-            <p style={{ fontSize: 11, color: "#818cf8", fontWeight: 700, letterSpacing: "0.1em", margin: "0 0 12px", textTransform: "uppercase" }}>
-              Next interview
-            </p>
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-              <div>
-                <p style={{ fontSize: 20, fontWeight: 800, margin: "0 0 4px" }}>{nextInterview.job?.title}</p>
-                <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 14px" }}>
-                  {formatDate(nextInterview.date)} · {formatTime(nextInterview.time)}
-                </p>
-                <CountdownTimer dateStr={nextInterview.date} timeStr={nextInterview.time} />
-              </div>
-              {nextInterview.meetingLink && (
-                <a href={nextInterview.meetingLink} target="_blank" rel="noreferrer" style={{
-                  display: "inline-flex", alignItems: "center", gap: 8,
-                  padding: "10px 20px", borderRadius: 10, fontSize: 14, fontWeight: 700,
-                  background: "#4f46e5", color: "white", textDecoration: "none",
-                  transition: "background 0.2s", flexShrink: 0
-                }}>
-                  🎥 Join interview
-                </a>
-              )}
+          <div className="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <p className="text-xl font-bold mb-1">{nextInterview.job?.title}</p>
+              <p className="text-sm text-[var(--text-secondary)] mb-3">
+                {formatDate(nextInterview.date)} · {formatTime(nextInterview.time)}
+              </p>
+              <CountdownTimer dateStr={nextInterview.date} timeStr={nextInterview.time} />
             </div>
+            {nextInterview.meetingLink && (
+              <a
+                href={nextInterview.meetingLink}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-primary"
+              >
+                <Video size={16} /> Join interview
+              </a>
+            )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Filter tabs */}
-        {!loading && interviews.length > 0 && (
-          <div style={{ display: "flex", gap: 6, marginBottom: 20, flexWrap: "wrap" }}>
-            {statuses.map(s => {
-              const count = s === "All" ? interviews.length : interviews.filter(i => i.status === s).length;
-              return (
-                <button key={s} onClick={() => setFilter(s)} style={{
-                  padding: "6px 14px", borderRadius: 999, fontSize: 13, fontWeight: 500,
-                  cursor: "pointer", transition: "all 0.2s",
-                  background: filter === s ? "#4f46e5" : "#0d1117",
-                  color: filter === s ? "white" : "#64748b",
-                  border: filter === s ? "1px solid #4f46e5" : "1px solid #1e2a4a"
-                }}>
-                  {s} {count > 0 && <span style={{ opacity: 0.7, fontSize: 11 }}>({count})</span>}
-                </button>
-              );
-            })}
-          </div>
-        )}
+      {/* Filter tabs */}
+      {!loading && interviews.length > 0 && (
+        <div className="flex gap-2 mb-5 flex-wrap">
+          {statuses.map(s => {
+            const count = s === "All" ? interviews.length : interviews.filter(i => i.status === s).length;
+            return (
+              <button
+                key={s}
+                onClick={() => setFilter(s)}
+                className={`badge cursor-pointer ${filter === s ? "badge-primary" : "badge-neutral"}`}
+              >
+                {s} {count > 0 && <span className="opacity-70 text-[11px]">({count})</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-        {/* Interview list */}
-        {loading ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {[1, 2, 3].map(i => (
-              <div key={i} style={{ height: 140, borderRadius: 16, background: "#0d1117", opacity: 0.6 }} />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "64px 0" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div>
-            <p style={{ fontSize: 16, color: "white", fontWeight: 600, margin: "0 0 6px" }}>
+      {/* Interview list */}
+      {loading ? (
+        <div className="flex flex-col gap-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="skeleton h-36 rounded-xl" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <Inbox size={28} />
+            </div>
+            <p className="empty-state-title">
               {filter === "All" ? "No interviews yet" : `No ${filter.toLowerCase()} interviews`}
             </p>
-            <p style={{ fontSize: 13, color: "#475569", margin: 0 }}>
-              When a recruiter schedules an interview with you, it'll appear here
+            <p className="empty-state-text">
+              When a recruiter schedules an interview with you, it will appear here
             </p>
           </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {filtered.map((interview) => {
-              const isNext = isUpcoming(interview) && interview.status !== "Cancelled";
-              return (
-                <div key={interview._id} style={{
-                  background: "#0d1117", borderRadius: 16, padding: 20,
-                  border: isNext ? "1px solid #312e81" : "1px solid #1e2a4a",
-                  transition: "border-color 0.2s", position: "relative", overflow: "hidden"
-                }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = isNext ? "#4f46e5" : "#2a3a6a"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = isNext ? "#312e81" : "#1e2a4a"}
-                >
-                  {/* Upcoming accent bar */}
-                  {isNext && (
-                    <div style={{
-                      position: "absolute", left: 0, top: 0, bottom: 0, width: 4,
-                      background: "linear-gradient(to bottom, #4f46e5, #7c3aed)"
-                    }} />
-                  )}
-
-                  <div style={{ paddingLeft: isNext ? 12 : 0 }}>
-                    {/* Top row */}
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
-                          <p style={{ fontWeight: 700, fontSize: 17, margin: 0 }}>{interview.job?.title}</p>
-                          <StatusBadge status={interview.status} />
-                        </div>
-                        {isNext && <CountdownTimer dateStr={interview.date} timeStr={interview.time} />}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filtered.map((interview) => {
+            const isNext = isUpcoming(interview) && interview.status !== "Cancelled";
+            return (
+              <div
+                key={interview._id}
+                className="card card-body relative overflow-hidden"
+                style={isNext ? { borderLeft: '3px solid var(--primary)' } : undefined}
+              >
+                <div className={isNext ? "pl-2" : ""}>
+                  {/* Top row */}
+                  <div className="flex items-start justify-between flex-wrap gap-2 mb-3">
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <p className="font-bold text-[17px]">{interview.job?.title}</p>
+                        <StatusBadge status={interview.status} />
                       </div>
+                      {isNext && <CountdownTimer dateStr={interview.date} timeStr={interview.time} />}
                     </div>
-
-                    {/* Details grid */}
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 16 }}>
-                      <div style={{
-                        background: "#0a0e1a", border: "1px solid #1e2a4a",
-                        borderRadius: 10, padding: "10px 14px", flex: "1 1 160px"
-                      }}>
-                        <p style={{ color: "#475569", fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", margin: "0 0 4px" }}>📅 Date</p>
-                        <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{formatDate(interview.date)}</p>
-                      </div>
-                      <div style={{
-                        background: "#0a0e1a", border: "1px solid #1e2a4a",
-                        borderRadius: 10, padding: "10px 14px", flex: "1 1 120px"
-                      }}>
-                        <p style={{ color: "#475569", fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", margin: "0 0 4px" }}>🕐 Time</p>
-                        <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{formatTime(interview.time)}</p>
-                      </div>
-                    </div>
-
-                    {/* Tips / action row */}
-                    {interview.status === "Cancelled" ? (
-                      <div style={{ padding: "10px 14px", background: "#2a1a1a", border: "1px solid #991b1b", borderRadius: 10 }}>
-                        <p style={{ margin: 0, fontSize: 13, color: "#f87171" }}>This interview has been cancelled. Contact your recruiter for more information.</p>
-                      </div>
-                    ) : interview.meetingLink ? (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                        <p style={{ margin: 0, fontSize: 12, color: "#475569" }}>
-                          💡 Tip: Join 5–10 minutes early and test your camera/mic beforehand
-                        </p>
-                        <a href={interview.meetingLink} target="_blank" rel="noreferrer" style={{
-                          display: "inline-flex", alignItems: "center", gap: 6,
-                          padding: "8px 18px", borderRadius: 10, fontSize: 13, fontWeight: 700,
-                          background: "#4f46e5", color: "white", textDecoration: "none", flexShrink: 0
-                        }}>
-                          🎥 Join interview
-                        </a>
-                      </div>
-                    ) : (
-                      <div style={{ padding: "10px 14px", background: "#1a1a2e", border: "1px solid #1e2a4a", borderRadius: 10 }}>
-                        <p style={{ margin: 0, fontSize: 13, color: "#475569" }}>Meeting link not added yet — check back closer to the interview date.</p>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Details grid */}
+                  <div className="flex flex-wrap gap-4 mb-4">
+                    <div className="flex-1 min-w-[160px] p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)]">
+                      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)] mb-1">
+                        <Calendar size={12} /> Date
+                      </p>
+                      <p className="text-sm font-semibold">{formatDate(interview.date)}</p>
+                    </div>
+                    <div className="flex-1 min-w-[120px] p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)]">
+                      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)] mb-1">
+                        <Clock size={12} /> Time
+                      </p>
+                      <p className="text-sm font-semibold">{formatTime(interview.time)}</p>
+                    </div>
+                  </div>
+
+                  {/* Tips / action row */}
+                  {interview.status === "Cancelled" ? (
+                    <div className="toast toast-error">
+                      <XCircle size={16} />
+                      This interview has been cancelled. Contact your recruiter for more information.
+                    </div>
+                  ) : interview.meetingLink ? (
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <p className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                        <Lightbulb size={13} /> Tip: Join 5–10 minutes early and test your camera/mic beforehand
+                      </p>
+                      <a
+                        href={interview.meetingLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-primary btn-sm"
+                      >
+                        <ExternalLink size={14} /> Join interview
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="toast toast-info">
+                      <Clock size={16} />
+                      Meeting link not added yet — check back closer to the interview date.
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

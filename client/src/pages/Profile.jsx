@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import {
+  Upload,
+  Search,
+  ClipboardList,
+  Plus,
+  BarChart3,
+  Sparkles,
+  AlertTriangle,
+  Check,
+  FileText,
+  ExternalLink,
+} from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────
 // Profile Page
@@ -114,99 +126,78 @@ function Profile() {
   };
 
   return (
-    <div style={{ background: "#070b18", minHeight: "100vh", color: "white" }}>
-      <div className="max-w-3xl mx-auto px-6 py-10">
+    <div className="page-container-narrow">
 
-        {/* Header */}
-        <h1 className="text-3xl font-bold mb-1">My Profile</h1>
-        <p className="mb-8" style={{ color: "#64748b" }}>
-          Manage your account and career tools
-        </p>
+      {/* Header */}
+      <div className="page-header">
+        <h1 className="page-title">My Profile</h1>
+        <p className="page-subtitle">Manage your account and career tools</p>
+      </div>
 
-        {/* Toast */}
-        {message.text && (
-          <div
-            className="mb-6 px-4 py-3 rounded-xl text-sm"
-            style={{
-              background: message.isError ? "#2a1a1a" : "#1a1f3a",
-              border:     `1px solid ${message.isError ? "#991b1b" : "#4f46e5"}`,
-              color:      message.isError ? "#f87171" : "#a5b4fc",
-            }}
-          >
-            {message.isError ? "⚠ " : "✓ "}{message.text}
-          </div>
-        )}
+      {/* Toast */}
+      {message.text && (
+        <div className={`toast mb-6 ${message.isError ? "toast-error" : "toast-success"}`}>
+          {message.isError ? (
+            <AlertTriangle size={16} />
+          ) : (
+            <Check size={16} />
+          )}
+          {message.text}
+        </div>
+      )}
 
-        {/* Account card */}
-        <div
-          className="rounded-2xl p-6 mb-5"
-          style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-        >
+      {/* Account card */}
+      <div className="card mb-5">
+        <div className="card-body">
           <h2 className="text-lg font-bold mb-5">Account Details</h2>
 
           {/* Avatar + name */}
-          <div
-            className="flex items-center gap-4 pb-5 mb-5"
-            style={{ borderBottom: "1px solid #1e2a4a" }}
-          >
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold"
-              style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "white" }}
-            >
+          <div className="flex items-center gap-4 pb-5 mb-5 border-b" style={{ borderColor: 'var(--border)' }}>
+            <div className="avatar avatar-xl">
               {user?.name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1">
               <p className="font-bold text-lg">{user?.name}</p>
-              <p className="text-sm" style={{ color: "#64748b" }}>{user?.email}</p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{user?.email}</p>
             </div>
-            <span
-              className="px-3 py-1 rounded-full text-xs font-semibold"
-              style={{
-                background: isCandidate ? "#1e1b4b" : "#0f2044",
-                color:      isCandidate ? "#a5b4fc"  : "#38bdf8",
-                border:     `1px solid ${isCandidate ? "#4f46e5" : "#0369a1"}`,
-              }}
-            >
+            <span className={`badge ${isCandidate ? "badge-primary" : "badge-info"}`}>
               {isCandidate ? "Candidate" : "Recruiter"}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs mb-1" style={{ color: "#64748b" }}>Name</p>
+              <p className="input-label">Name</p>
               <p className="text-sm font-medium">{user?.name}</p>
             </div>
             <div>
-              <p className="text-xs mb-1" style={{ color: "#64748b" }}>Email</p>
+              <p className="input-label">Email</p>
               <p className="text-sm font-medium">{user?.email}</p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Resume section — candidates only */}
-        {isCandidate && (
-          <div
-            className="rounded-2xl p-6 mb-5"
-            style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-          >
+      {/* Resume section — candidates only */}
+      {isCandidate && (
+        <div className="card mb-5">
+          <div className="card-body">
             <h2 className="text-lg font-bold mb-5">Resume</h2>
 
             {/* Current resume — visible as soon as user logs in (BUG FIX) */}
             {resumeUrl && (
-              <div
-                className="flex items-center justify-between p-4 rounded-xl mb-5"
-                style={{ background: "#1e1b4b", border: "1px solid #4f46e5" }}
-              >
+              <div className="flex items-center justify-between p-4 rounded-lg mb-5"
+                style={{ background: 'var(--primary-50)', border: '1px solid var(--primary)' }}>
                 <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold"
-                    style={{ background: "#2d1f3a", color: "#c084fc" }}
-                  >
-                    PDF
+                  <div className="flex-center w-10 h-10 rounded-lg"
+                    style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                    <FileText size={18} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">Resume uploaded ✓</p>
-                    <p className="text-xs" style={{ color: "#64748b" }}>
+                    <p className="text-sm font-semibold flex items-center gap-1">
+                      Resume uploaded <Check size={14} className="text-green-600" />
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                       Click View to open · Upload new to replace
                     </p>
                   </div>
@@ -215,9 +206,9 @@ function Profile() {
                   href={resumeUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 py-2 rounded-lg text-sm font-semibold"
-                  style={{ background: "#4f46e5", color: "white" }}
+                  className="btn btn-primary btn-sm"
                 >
+                  <ExternalLink size={14} />
                   View Resume
                 </a>
               </div>
@@ -225,22 +216,20 @@ function Profile() {
 
             {/* Upload area — clicking it opens the file picker */}
             <div
-              className="rounded-xl p-6 text-center mb-4 cursor-pointer transition-all"
-              style={{ background: "#070b18", border: "2px dashed #1e2a4a" }}
+              className="rounded-lg p-6 text-center mb-4 cursor-pointer"
+              style={{ border: '2px dashed var(--border)', background: 'var(--bg-secondary)' }}
               onClick={() => document.getElementById("resume-input").click()}
-              onMouseEnter={e => e.currentTarget.style.borderColor = "#4f46e5"}
-              onMouseLeave={e => e.currentTarget.style.borderColor = "#1e2a4a"}
             >
               <input
                 id="resume-input"
                 type="file"
                 accept=".pdf"
-                style={{ display: "none" }}
+                className="hidden"
                 onChange={e => setSelectedFile(e.target.files[0])}
               />
-              <div className="text-3xl mb-2">📎</div>
+              <Upload size={28} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
               {selectedFile ? (
-                <p className="text-sm font-medium" style={{ color: "#a5b4fc" }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--primary)' }}>
                   {selectedFile.name}
                 </p>
               ) : (
@@ -248,7 +237,7 @@ function Profile() {
                   <p className="text-sm font-medium mb-1">
                     {resumeUrl ? "Click to upload a new resume" : "Click to upload your resume"}
                   </p>
-                  <p className="text-xs" style={{ color: "#64748b" }}>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     PDF only · Max 5MB
                   </p>
                 </>
@@ -260,15 +249,9 @@ function Profile() {
               <button
                 onClick={handleUpload}
                 disabled={!selectedFile || uploading}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                style={{
-                  background: selectedFile && !uploading
-                    ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
-                    : "#1e2a4a",
-                  color:  selectedFile && !uploading ? "white" : "#475569",
-                  cursor: selectedFile && !uploading ? "pointer" : "not-allowed",
-                }}
+                className="btn btn-primary flex-1"
               >
+                <Upload size={16} />
                 {uploading ? "Uploading..." : resumeUrl ? "Update Resume" : "Upload Resume"}
               </button>
 
@@ -277,43 +260,33 @@ function Profile() {
                 <button
                   onClick={handleAnalyze}
                   disabled={analyzing}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                  style={{
-                    background: "#1e1b4b",
-                    color:      "#a5b4fc",
-                    border:     "1px solid #4f46e5",
-                    cursor:     analyzing ? "not-allowed" : "pointer",
-                    opacity:    analyzing ? 0.6 : 1,
-                  }}
+                  className="btn btn-secondary flex-1"
                 >
-                  {analyzing ? "Analyzing..." : "✦ Analyze with AI"}
+                  <Sparkles size={16} />
+                  {analyzing ? "Analyzing..." : "Analyze with AI"}
                 </button>
               )}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Analysis mini-preview */}
-        {isCandidate && analysis && (
-          <div
-            className="rounded-2xl p-6 mb-5"
-            style={{ background: "#0d1117", border: "1px solid #4f46e5" }}
-          >
+      {/* Analysis mini-preview */}
+      {isCandidate && analysis && (
+        <div className="card mb-5" style={{ borderColor: 'var(--primary)' }}>
+          <div className="card-body">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-bold">Last Analysis</h2>
-              <span className="text-2xl font-bold" style={{ color: "#818cf8" }}>
+              <span className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>
                 {analysis.score}/100
               </span>
             </div>
 
             {/* Score bar */}
-            <div className="h-2 rounded-full mb-4" style={{ background: "#1e2a4a" }}>
+            <div className="progress-bar mb-4">
               <div
-                className="h-2 rounded-full"
-                style={{
-                  width:      `${analysis.score}%`,
-                  background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
-                }}
+                className="progress-fill"
+                style={{ width: `${analysis.score}%` }}
               />
             </div>
 
@@ -321,11 +294,7 @@ function Profile() {
             {analysis.skills?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {analysis.skills.slice(0, 5).map((skill, i) => (
-                  <span
-                    key={i}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium"
-                    style={{ background: "#1e1b4b", color: "#a5b4fc", border: "1px solid #4f46e5" }}
-                  >
+                  <span key={i} className="badge badge-primary">
                     {skill}
                   </span>
                 ))}
@@ -334,66 +303,62 @@ function Profile() {
 
             <Link
               to="/resume-analysis"
-              className="text-sm font-semibold"
-              style={{ color: "#6366f1" }}
+              className="btn btn-ghost btn-sm"
+              style={{ color: 'var(--primary)' }}
             >
               View Full Analysis →
             </Link>
           </div>
-        )}
-
-        {/* Quick nav links */}
-        <div className="grid grid-cols-2 gap-3">
-          {isCandidate ? (
-            <>
-              <Link
-                to="/jobs"
-                className="p-4 rounded-2xl text-center transition-all"
-                style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#4f46e5"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#1e2a4a"}
-              >
-                <div className="text-xl mb-1">🔍</div>
-                <p className="text-sm font-medium">Browse Jobs</p>
-              </Link>
-              <Link
-                to="/my-applications"
-                className="p-4 rounded-2xl text-center transition-all"
-                style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#4f46e5"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#1e2a4a"}
-              >
-                <div className="text-xl mb-1">📋</div>
-                <p className="text-sm font-medium">My Applications</p>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/create-job"
-                className="p-4 rounded-2xl text-center transition-all"
-                style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#4f46e5"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#1e2a4a"}
-              >
-                <div className="text-xl mb-1">➕</div>
-                <p className="text-sm font-medium">Post New Job</p>
-              </Link>
-              <Link
-                to="/recruiter-dashboard"
-                className="p-4 rounded-2xl text-center transition-all"
-                style={{ background: "#0d1117", border: "1px solid #1e2a4a" }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#4f46e5"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#1e2a4a"}
-              >
-                <div className="text-xl mb-1">📊</div>
-                <p className="text-sm font-medium">My Jobs</p>
-              </Link>
-            </>
-          )}
         </div>
+      )}
 
+      {/* Quick nav links */}
+      <div className="grid grid-cols-2 gap-3">
+        {isCandidate ? (
+          <>
+            <Link to="/jobs" className="quick-action">
+              <div className="quick-action-icon">
+                <Search size={20} />
+              </div>
+              <div>
+                <p className="quick-action-label">Browse Jobs</p>
+                <p className="quick-action-desc">Find opportunities</p>
+              </div>
+            </Link>
+            <Link to="/my-applications" className="quick-action">
+              <div className="quick-action-icon">
+                <ClipboardList size={20} />
+              </div>
+              <div>
+                <p className="quick-action-label">My Applications</p>
+                <p className="quick-action-desc">Track your progress</p>
+              </div>
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link to="/create-job" className="quick-action">
+              <div className="quick-action-icon">
+                <Plus size={20} />
+              </div>
+              <div>
+                <p className="quick-action-label">Post New Job</p>
+                <p className="quick-action-desc">Create a listing</p>
+              </div>
+            </Link>
+            <Link to="/recruiter-dashboard" className="quick-action">
+              <div className="quick-action-icon">
+                <BarChart3 size={20} />
+              </div>
+              <div>
+                <p className="quick-action-label">My Jobs</p>
+                <p className="quick-action-desc">Manage postings</p>
+              </div>
+            </Link>
+          </>
+        )}
       </div>
+
     </div>
   );
 }
